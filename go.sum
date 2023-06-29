@@ -1,3 +1,7 @@
+github.com/a-h/generate v0.0.0-20220105161013-96c14dfdfb60 h1:/rNdG6EuzjwcR1KRFpF+9qWmWh2xIcz84QOeMGr/2L8=
+github.com/a-h/generate v0.0.0-20220105161013-96c14dfdfb60/go.mod h1:traiLYQ0YD7qUMCdjo6/jSaJRPHXniX4HVs+PhEhYpc=
+github.com/atombender/go-jsonschema v0.12.0 h1:3akbGLTV41vVeNIdSMZfM4lcqQgVnwmOLF8zKnFdWH4=
+github.com/atombender/go-jsonschema v0.12.0/go.mod h1:6WyhPNbz6H8M3IzlAd1DMENTh/QUHBYoFe8na6yl1FE=
 github.com/golang/mock v1.6.0 h1:ErTB+efbowRARo13NNdxyJji2egdxLGQhRaY+DUumQc=
 github.com/golang/mock v1.6.0/go.mod h1:p6yTPP+5HYm5mzsMV8JkE6ZKdX+/wYM6Hr+LicevLPs=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=

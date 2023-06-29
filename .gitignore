@@ -19,5 +19,6 @@
 
 # Go workspace file
 go.work
-static
+static/@signalk/freeboard-sk
+static/@signalk/instrumentpanel
 main

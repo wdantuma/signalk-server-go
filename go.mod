@@ -1,10 +1,14 @@
-module github.com/wdantuma/signal-k-go
+module github.com/wdantuma/signalk-server-go
 
 go 1.20
 
 require go.einride.tech/can v0.5.5
 
-require github.com/gorilla/mux v1.8.0 // indirect
+require (
+	github.com/a-h/generate v0.0.0-20220105161013-96c14dfdfb60 // indirect
+	github.com/atombender/go-jsonschema v0.12.0 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
+)
 
 require (
 	github.com/golang/mock v1.6.0 // indirect
