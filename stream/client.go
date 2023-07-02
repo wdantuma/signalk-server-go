@@ -2,11 +2,15 @@ package stream
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/wdantuma/signalk-server-go/ref"
+	"github.com/wdantuma/signalk-server-go/signalk"
+	"github.com/wdantuma/signalk-server-go/signalkserver"
 )
 
 const (
@@ -44,6 +48,18 @@ type client struct {
 	send chan []byte
 }
 
+func helloMessage() []byte {
+	hello := signalk.HelloJson{}
+	hello.Name = ref.String(signalkserver.SERVER_NAME)
+	hello.Version = (signalk.Version)(signalkserver.VERSION)
+	hello.Timestamp = ref.TimeStamp(time.Now())
+	hello.Self = ref.String("vessels.urn:mrn:signalk:uuid:c02711fd-7f19-4272-b642-39344857ea0d")
+	hello.Roles = append(hello.Roles, "master")
+	hello.Roles = append(hello.Roles, "main")
+	helloBytes, _ := json.Marshal(hello)
+	return helloBytes
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -66,7 +82,7 @@ func (c *client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.Broadcast <- message
+		//c.hub.Broadcast <- message
 	}
 }
 
@@ -125,20 +141,8 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	client := &client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
-	hello := []byte(`
-	{
-		"name": "foobar marine server",
-		"version": "1.0.4",
-		"timestamp": "2018-06-21T15:09:16.704Z",
-		"self": "vessels.urn:mrn:signalk:uuid:c02711fd-7f19-4272-b642-39344857ea0d",
-		"roles": [
-			"master",
-			"main"
-		]
-	}
-			`)
 
-	client.send <- hello
+	client.send <- helloMessage()
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
