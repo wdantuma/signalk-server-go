@@ -5,9 +5,12 @@ go 1.20
 require go.einride.tech/can v0.5.5
 
 require (
+	aqwari.net/xml v0.0.0-20210331023308-d9421b293817 // indirect
 	github.com/a-h/generate v0.0.0-20220105161013-96c14dfdfb60 // indirect
 	github.com/atombender/go-jsonschema v0.12.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 )
 
 require (
