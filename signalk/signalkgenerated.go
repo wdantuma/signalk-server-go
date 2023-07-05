@@ -109,6 +109,27 @@ type DeltaJsonUpdatesElemValuesElem struct {
 	Value interface{} `json:"value" yaml:"value" mapstructure:"value"`
 }
 
+// Schema for SignalK discovery resources used to locate server endpoints.
+type DiscoveryJson struct {
+	// The set of endpoints known to this server
+	Endpoints DiscoveryJsonEndpoints `json:"endpoints,omitempty" yaml:"endpoints,omitempty" mapstructure:"endpoints,omitempty"`
+
+	// Information about this server
+	Server *DiscoveryJsonServer `json:"server,omitempty" yaml:"server,omitempty" mapstructure:"server,omitempty"`
+}
+
+// The set of endpoints known to this server
+type DiscoveryJsonEndpoints map[string]interface{}
+
+// Information about this server
+type DiscoveryJsonServer struct {
+	// The id of this server (signalk-server-node, iKommunicate, etc.)
+	Id string `json:"id" yaml:"id" mapstructure:"id"`
+
+	// The version of this server (not limited to signalk versioning rules).
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
+}
+
 // A geohash (see http://geohash.org)
 type Geohash string
 
@@ -419,25 +440,18 @@ type Timestamp string
 // possible.
 type Units string
 
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *HelloJsonRolesElem) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_HelloJsonRolesElem {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_HelloJsonRolesElem, v)
-	}
-	*j = HelloJsonRolesElem(v)
-	return nil
-}
+// A location of a resource, potentially relative. For hierarchical schemes (like
+// http), applications must resolve relative URIs (e.g. './v1/api/').
+// Implementations should support the following schemes: http:, https:, mailto:,
+// tel:, and ws:.
+type Url string
+
+// A unique Signal K flavoured maritime resource identifier (MRN). A MRN is a form
+// of URN, following a specific format: urn:mrn:<issueing authority>:<id
+// type>:<id>. In case of a Signal K uuid, that looks like this:
+// urn:mrn:signalk:uuid:<uuid>, where Signal K is the issuing authority and UUID
+// (v4) the ID type.
+type Uuid string
 
 type ValuesDatetimeValue struct {
 	// Pgn corresponds to the JSON schema field "pgn".
@@ -495,79 +509,24 @@ type Waypoint struct {
 	Position Position `json:"position,omitempty" yaml:"position,omitempty" mapstructure:"position,omitempty"`
 }
 
-var enumValues_AlarmMethodEnum = []interface{}{
-	"visual",
-	"sound",
-}
-
-// A location of a resource, potentially relative. For hierarchical schemes (like
-// http), applications must resolve relative URIs (e.g. './v1/api/').
-// Implementations should support the following schemes: http:, https:, mailto:,
-// tel:, and ws:.
-type Url string
-
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *AlarmMethodEnum) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_AlarmMethodEnum {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmMethodEnum, v)
-	}
-	*j = AlarmMethodEnum(v)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *SignalkJson) UnmarshalJSON(b []byte) error {
+func (j *DeltaJsonUpdatesElemMetaElem) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
-	if v, ok := raw["self"]; !ok || v == nil {
-		return fmt.Errorf("field self in SignalkJson: required")
+	if v, ok := raw["path"]; !ok || v == nil {
+		return fmt.Errorf("field path in DeltaJsonUpdatesElemMetaElem: required")
 	}
-	if v, ok := raw["version"]; !ok || v == nil {
-		return fmt.Errorf("field version in SignalkJson: required")
+	if v, ok := raw["value"]; !ok || v == nil {
+		return fmt.Errorf("field value in DeltaJsonUpdatesElemMetaElem: required")
 	}
-	type Plain SignalkJson
+	type Plain DeltaJsonUpdatesElemMetaElem
 	var plain Plain
 	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
 	}
-	*j = SignalkJson(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *Attr) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	type Plain Attr
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["_group"]; !ok || v == nil {
-		plain.Group = "self"
-	}
-	if v, ok := raw["_mode"]; !ok || v == nil {
-		plain.Mode = 644.0
-	}
-	if v, ok := raw["_owner"]; !ok || v == nil {
-		plain.Owner = "self"
-	}
-	*j = Attr(plain)
+	*j = DeltaJsonUpdatesElemMetaElem(plain)
 	return nil
 }
 
@@ -578,30 +537,23 @@ var enumValues_HelloJsonRolesElem = []interface{}{
 	"slave",
 }
 
-// A unique Signal K flavoured maritime resource identifier (MRN). A MRN is a form
-// of URN, following a specific format: urn:mrn:<issueing authority>:<id
-// type>:<id>. In case of a Signal K uuid, that looks like this:
-// urn:mrn:signalk:uuid:<uuid>, where Signal K is the issuing authority and UUID
-// (v4) the ID type.
-type Uuid string
-
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *AlarmState) UnmarshalJSON(b []byte) error {
+func (j *MetaDisplayScaleType) UnmarshalJSON(b []byte) error {
 	var v string
 	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
-	for _, expected := range enumValues_AlarmState {
+	for _, expected := range enumValues_MetaDisplayScaleType {
 		if reflect.DeepEqual(v, expected) {
 			ok = true
 			break
 		}
 	}
 	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmState, v)
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_MetaDisplayScaleType, v)
 	}
-	*j = AlarmState(v)
+	*j = MetaDisplayScaleType(v)
 	return nil
 }
 
@@ -627,6 +579,48 @@ func (j *CommonValueFields) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
+func (j *SignalkJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["self"]; !ok || v == nil {
+		return fmt.Errorf("field self in SignalkJson: required")
+	}
+	if v, ok := raw["version"]; !ok || v == nil {
+		return fmt.Errorf("field version in SignalkJson: required")
+	}
+	type Plain SignalkJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = SignalkJson(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Source) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["label"]; !ok || v == nil {
+		return fmt.Errorf("field label in Source: required")
+	}
+	type Plain Source
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["type"]; !ok || v == nil {
+		plain.Type = "NMEA2000"
+	}
+	*j = Source(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
 func (j *NullValue) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(b, &raw); err != nil {
@@ -641,6 +635,153 @@ func (j *NullValue) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("field %s: must be null", "value")
 	}
 	*j = NullValue(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *HelloJsonRolesElem) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_HelloJsonRolesElem {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_HelloJsonRolesElem, v)
+	}
+	*j = HelloJsonRolesElem(v)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *HelloJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["roles"]; !ok || v == nil {
+		return fmt.Errorf("field roles in HelloJson: required")
+	}
+	if v, ok := raw["version"]; !ok || v == nil {
+		return fmt.Errorf("field version in HelloJson: required")
+	}
+	type Plain HelloJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if len(plain.Roles) < 2 {
+		return fmt.Errorf("field %s length: must be >= %d", "roles", 2)
+	}
+	if len(plain.Roles) > 2 {
+		return fmt.Errorf("field %s length: must be <= %d", "roles", 2)
+	}
+	*j = HelloJson(plain)
+	return nil
+}
+
+var enumValues_MetaDisplayScaleType = []interface{}{
+	"linear",
+	"logarithmic",
+	"squareroot",
+	"power",
+}
+var enumValues_AlarmMethodEnum = []interface{}{
+	"visual",
+	"sound",
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *MetaZonesElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["state"]; !ok || v == nil {
+		return fmt.Errorf("field state in MetaZonesElem: required")
+	}
+	type Plain MetaZonesElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["message"]; !ok || v == nil {
+		plain.Message = "Warning"
+	}
+	*j = MetaZonesElem(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DeltaJsonUpdatesElemValuesElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["path"]; !ok || v == nil {
+		return fmt.Errorf("field path in DeltaJsonUpdatesElemValuesElem: required")
+	}
+	if v, ok := raw["value"]; !ok || v == nil {
+		return fmt.Errorf("field value in DeltaJsonUpdatesElemValuesElem: required")
+	}
+	type Plain DeltaJsonUpdatesElemValuesElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DeltaJsonUpdatesElemValuesElem(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *AlarmState) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_AlarmState {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmState, v)
+	}
+	*j = AlarmState(v)
+	return nil
+}
+
+var enumValues_AlarmState = []interface{}{
+	"nominal",
+	"normal",
+	"alert",
+	"warn",
+	"alarm",
+	"emergency",
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DeltaJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["updates"]; !ok || v == nil {
+		return fmt.Errorf("field updates in DeltaJson: required")
+	}
+	type Plain DeltaJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DeltaJson(plain)
 	return nil
 }
 
@@ -684,167 +825,67 @@ func (j *Meta) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-var enumValues_AlarmState = []interface{}{
-	"nominal",
-	"normal",
-	"alert",
-	"warn",
-	"alarm",
-	"emergency",
-}
-
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *HelloJson) UnmarshalJSON(b []byte) error {
+func (j *Attr) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
-	if v, ok := raw["roles"]; !ok || v == nil {
-		return fmt.Errorf("field roles in HelloJson: required")
+	type Plain Attr
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["_group"]; !ok || v == nil {
+		plain.Group = "self"
+	}
+	if v, ok := raw["_mode"]; !ok || v == nil {
+		plain.Mode = 644.0
+	}
+	if v, ok := raw["_owner"]; !ok || v == nil {
+		plain.Owner = "self"
+	}
+	*j = Attr(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DiscoveryJsonServer) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["id"]; !ok || v == nil {
+		return fmt.Errorf("field id in DiscoveryJsonServer: required")
 	}
 	if v, ok := raw["version"]; !ok || v == nil {
-		return fmt.Errorf("field version in HelloJson: required")
+		return fmt.Errorf("field version in DiscoveryJsonServer: required")
 	}
-	type Plain HelloJson
+	type Plain DiscoveryJsonServer
 	var plain Plain
 	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
 	}
-	if len(plain.Roles) < 2 {
-		return fmt.Errorf("field %s length: must be >= %d", "roles", 2)
-	}
-	if len(plain.Roles) > 2 {
-		return fmt.Errorf("field %s length: must be <= %d", "roles", 2)
-	}
-	*j = HelloJson(plain)
+	*j = DiscoveryJsonServer(plain)
 	return nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *MetaZonesElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["state"]; !ok || v == nil {
-		return fmt.Errorf("field state in MetaZonesElem: required")
-	}
-	type Plain MetaZonesElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["message"]; !ok || v == nil {
-		plain.Message = "Warning"
-	}
-	*j = MetaZonesElem(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJsonUpdatesElemMetaElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["path"]; !ok || v == nil {
-		return fmt.Errorf("field path in DeltaJsonUpdatesElemMetaElem: required")
-	}
-	if v, ok := raw["value"]; !ok || v == nil {
-		return fmt.Errorf("field value in DeltaJsonUpdatesElemMetaElem: required")
-	}
-	type Plain DeltaJsonUpdatesElemMetaElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJsonUpdatesElemMetaElem(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *MetaDisplayScaleType) UnmarshalJSON(b []byte) error {
+func (j *AlarmMethodEnum) UnmarshalJSON(b []byte) error {
 	var v string
 	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
-	for _, expected := range enumValues_MetaDisplayScaleType {
+	for _, expected := range enumValues_AlarmMethodEnum {
 		if reflect.DeepEqual(v, expected) {
 			ok = true
 			break
 		}
 	}
 	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_MetaDisplayScaleType, v)
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmMethodEnum, v)
 	}
-	*j = MetaDisplayScaleType(v)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJsonUpdatesElemValuesElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["path"]; !ok || v == nil {
-		return fmt.Errorf("field path in DeltaJsonUpdatesElemValuesElem: required")
-	}
-	if v, ok := raw["value"]; !ok || v == nil {
-		return fmt.Errorf("field value in DeltaJsonUpdatesElemValuesElem: required")
-	}
-	type Plain DeltaJsonUpdatesElemValuesElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJsonUpdatesElemValuesElem(plain)
-	return nil
-}
-
-var enumValues_MetaDisplayScaleType = []interface{}{
-	"linear",
-	"logarithmic",
-	"squareroot",
-	"power",
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *Source) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["label"]; !ok || v == nil {
-		return fmt.Errorf("field label in Source: required")
-	}
-	type Plain Source
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["type"]; !ok || v == nil {
-		plain.Type = "NMEA2000"
-	}
-	*j = Source(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJson) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["updates"]; !ok || v == nil {
-		return fmt.Errorf("field updates in DeltaJson: required")
-	}
-	type Plain DeltaJson
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJson(plain)
+	*j = AlarmMethodEnum(v)
 	return nil
 }

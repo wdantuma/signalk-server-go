@@ -8,6 +8,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/wdantuma/signalk-server-go/converter"
+	"github.com/wdantuma/signalk-server-go/signalk/filter"
+	"github.com/wdantuma/signalk-server-go/signalk/format"
+	"github.com/wdantuma/signalk-server-go/socketcan"
 	"github.com/wdantuma/signalk-server-go/stream"
 )
 
@@ -56,8 +60,7 @@ func generate(hub *stream.Hub) {
 
 func main() {
 	hub := stream.NewHub()
-	go hub.Run()
-	go generate(hub)
+
 	route := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./static"))
 	route.HandleFunc("/signalk/v1/stream", func(w http.ResponseWriter, r *http.Request) {
@@ -68,8 +71,29 @@ func main() {
 
 	route.Handle("/", http.RedirectHandler("/@signalk/instrumentpanel", http.StatusSeeOther))
 
+	// main loop
+	source, err := socketcan.NewCanDumpSource("data/n2kdump.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	converter, err := converter.NewCanToSignalk()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sk := converter.Convert(source)
+	filterDef := filter.NewFilter()
+	filter := filterDef.Filter(sk)
+	json := format.Json(filter)
+
+	go func() {
+		for bytes := range json {
+			hub.Broadcast <- bytes
+		}
+	}()
+
 	log.Print("Listening on :3000...")
-	err := http.ListenAndServe(":3000", route)
+	err = http.ListenAndServe(":3000", route)
 	if err != nil {
 		log.Fatal(err)
 	}

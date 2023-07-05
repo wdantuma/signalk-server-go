@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
+	"github.com/wdantuma/signalk-server-go/signalk/filter"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 )
 
@@ -39,7 +40,8 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type client struct {
-	hub *Hub
+	filter *filter.Filter
+	hub    *Hub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -52,8 +54,8 @@ func helloMessage() []byte {
 	hello := signalk.HelloJson{}
 	hello.Name = ref.String(signalkserver.SERVER_NAME)
 	hello.Version = (signalk.Version)(signalkserver.VERSION)
-	hello.Timestamp = ref.TimeStamp(time.Now())
-	hello.Self = ref.String("vessels.urn:mrn:signalk:uuid:c02711fd-7f19-4272-b642-39344857ea0d")
+	hello.Timestamp = ref.UTCTimeStamp(time.Now())
+	hello.Self = ref.String(signalkserver.SELF)
 	hello.Roles = append(hello.Roles, "master")
 	hello.Roles = append(hello.Roles, "main")
 	helloBytes, _ := json.Marshal(hello)
@@ -139,7 +141,8 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	filter := filter.NewFilter()
+	client := &client{hub: hub, filter: filter, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
 	client.send <- helloMessage()

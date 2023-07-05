@@ -11,6 +11,10 @@ func String(i string) *string {
 	return &i
 }
 
-func TimeStamp(i time.Time) *signalk.Timestamp {
+func UTCTimeStamp(i time.Time) *signalk.Timestamp {
 	return (*signalk.Timestamp)(String(i.UTC().Format(signalkserver.TIME_FORMAT)))
+}
+
+func Float64(f float64) *float64 {
+	return &f
 }
