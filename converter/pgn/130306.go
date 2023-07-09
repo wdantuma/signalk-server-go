@@ -20,6 +20,20 @@ func NewPgn130306() *Pgn130306 {
 			},
 		},
 		field{
+			node:   "environment.wind.speedTrue",
+			source: "windSpeed",
+			filter: func(fields n2kFields) bool {
+				return fields.Contains("reference") && fields["reference"] == "True (boat referenced)"
+			},
+		},
+		field{
+			node:   "environment.wind.speedOverGround",
+			source: "windSpeed",
+			filter: func(fields n2kFields) bool {
+				return fields.Contains("reference") && fields["reference"] == "True (ground referenced to North)"
+			},
+		},
+		field{
 			node: "environment.wind.angleApparent",
 			filter: func(fields n2kFields) bool {
 				return !fields.Contains("reference") || fields["reference"] == "Apparent"
@@ -31,6 +45,27 @@ func NewPgn130306() *Pgn130306 {
 				}
 
 				return angle
+			},
+		},
+		field{
+			node:   "environment.wind.angleTrueWater",
+			source: "windAngle",
+			filter: func(fields n2kFields) bool {
+				return fields.Contains("reference") && fields["reference"] == "True (boat referenced)"
+			},
+		},
+		field{
+			node:   "environment.wind.directionTrue",
+			source: "windAngle",
+			filter: func(fields n2kFields) bool {
+				return fields.Contains("reference") && fields["reference"] == "True (ground referenced to North)"
+			},
+		},
+		field{
+			node:   "environment.wind.directionMagnetic",
+			source: "windAngle",
+			filter: func(fields n2kFields) bool {
+				return fields.Contains("reference") && fields["reference"] == "Magnetic (ground referenced to Magnetic North)"
 			},
 		},
 	)
