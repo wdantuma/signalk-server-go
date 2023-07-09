@@ -2,18 +2,17 @@ package converter
 
 import (
 	"log"
-	"strconv"
-	"time"
 
 	"github.com/wdantuma/signalk-server-go/canboat"
-	"github.com/wdantuma/signalk-server-go/ref"
+	"github.com/wdantuma/signalk-server-go/converter/pgn"
 	"github.com/wdantuma/signalk-server-go/signalk"
-	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/socketcan"
+	"go.einride.tech/can"
 )
 
 type canToSignalk struct {
 	canboat *canboat.Canboat
+	pgn     map[uint]interface{}
 }
 
 func NewCanToSignalk() (*canToSignalk, error) {
@@ -21,46 +20,37 @@ func NewCanToSignalk() (*canToSignalk, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := canToSignalk{canboat: canboat}
+	c := canToSignalk{canboat: canboat, pgn: make(map[uint]interface{})}
+	c.addPgn(130306, pgn.NewPgn130306())
 
 	return &c, nil
+}
+
+func (c *canToSignalk) addPgn(pgn uint, b pgn.PgnBase) {
+	if b.Init(pgn, c.canboat) {
+		c.pgn[pgn] = b
+	}
+}
+
+func (c *canToSignalk) GetPgnConverter(frame can.Frame) (interface{}, bool) {
+	pgn := frame.ID & 0x03FFFF00 >> 8
+	pgnConverter, ok := c.pgn[uint(pgn)]
+	if ok {
+		return pgnConverter, true
+	}
+	return nil, false
 }
 
 func (c *canToSignalk) Convert(canSource *socketcan.CanSource) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	go func() {
 		for frame := range canSource.Source {
-			pgn := frame.ID & 0x03FFFF00 >> 8
-			pgnInfo, ok := c.canboat.GetPGNInfo(uint(pgn))
+			pgnConverter, ok := c.GetPgnConverter(frame)
 			if ok {
-				src := frame.ID & 0xFF
-				delta := signalk.DeltaJson{}
-				delta.Context = ref.String(signalkserver.SELF)
-				update := signalk.DeltaJsonUpdatesElem{}
-				update.Timestamp = ref.UTCTimeStamp(time.Now()) // TODO get from source
-				update.Source = &signalk.Source{Pgn: ref.Float64(float64(pgn)),
-					Src:   ref.String(strconv.FormatUint(uint64(src), 10)),
-					Type:  "NMEA2000",
-					Label: canSource.Label}
-				for _, field := range pgnInfo.Fields.Field {
-					val := signalk.DeltaJsonUpdatesElemValuesElem{}
-
-					path := ""
-					if field.Id == "windSpeed" {
-						path = "environment.wind.speedApparent"
-					}
-
-					if field.Id == "windAngle" {
-						path = "environment.wind.angleApparent"
-					}
-
-					val.Path = path
-					value := float64(frame.Data.UnsignedBitsLittleEndian(uint8(field.BitOffset), uint8(field.BitLength))) * float64(field.Resolution)
-					val.Value = value
-					update.Values = append(update.Values, val)
+				delta, convertOk := pgnConverter.(pgn.Pgn).Convert(frame, canSource)
+				if convertOk {
+					output <- delta
 				}
-				delta.Updates = append(delta.Updates, update)
-				output <- delta
 			}
 		}
 		close(output)
