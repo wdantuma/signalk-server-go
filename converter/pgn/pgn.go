@@ -27,7 +27,7 @@ type field struct {
 	source string
 }
 
-type pgnBase struct {
+type PgnBase struct {
 	Pgn     uint
 	PgnInfo *canboat.PGNInfo
 	Canboat *canboat.Canboat
@@ -38,16 +38,12 @@ type Pgn interface {
 	Convert(can.Frame, *socketcan.CanSource) (signalk.DeltaJson, bool)
 }
 
-type PgnBase interface {
-	Init(pgn uint, canboat *canboat.Canboat) bool
-}
-
-func NewPgnBase() pgnBase {
-	return pgnBase{Fields: make([]field, 0)}
+func NewPgnBase(pgn uint) *PgnBase {
+	return &PgnBase{Pgn: pgn, Fields: make([]field, 0)}
 
 }
 
-func (base *pgnBase) GetDelta(frame can.Frame, canSource *socketcan.CanSource) signalk.DeltaJson {
+func (base *PgnBase) GetDelta(frame can.Frame, canSource *socketcan.CanSource) signalk.DeltaJson {
 	src := frame.ID & 0xFF
 	delta := signalk.DeltaJson{}
 	delta.Context = ref.String(signalkserver.SELF)
@@ -63,7 +59,7 @@ func (base *pgnBase) GetDelta(frame can.Frame, canSource *socketcan.CanSource) s
 	return delta
 }
 
-func (pgn *pgnBase) Convert(frame can.Frame, canSource *socketcan.CanSource) (signalk.DeltaJson, bool) {
+func (pgn *PgnBase) Convert(frame can.Frame, canSource *socketcan.CanSource) (signalk.DeltaJson, bool) {
 	delta := pgn.GetDelta(frame, canSource)
 
 	fields := make(n2kFields)
@@ -109,10 +105,9 @@ func (pgn *pgnBase) Convert(frame can.Frame, canSource *socketcan.CanSource) (si
 	return delta, include
 }
 
-func (base *pgnBase) Init(pgn uint, canboat *canboat.Canboat) bool {
-	base.Pgn = pgn
+func (base *PgnBase) Init(canboat *canboat.Canboat) bool {
 	base.Canboat = canboat
-	pgnInfo, ok := canboat.GetPGNInfo(pgn)
+	pgnInfo, ok := canboat.GetPGNInfo(base.Pgn)
 	if !ok {
 		return false
 	}
@@ -120,7 +115,7 @@ func (base *pgnBase) Init(pgn uint, canboat *canboat.Canboat) bool {
 	return true
 }
 
-func (base *pgnBase) GetEnumValueName(value float64, name string) (string, bool) {
+func (base *PgnBase) GetEnumValueName(value float64, name string) (string, bool) {
 
 	lookupEnumeration, ok := base.Canboat.GetLookupEnumeration(name)
 	if ok {

@@ -4,12 +4,8 @@ import (
 	"math"
 )
 
-type Pgn130306 struct {
-	pgnBase
-}
-
-func NewPgn130306() *Pgn130306 {
-	pgn := &Pgn130306{pgnBase: NewPgnBase()}
+func NewPgn130306() *PgnBase {
+	pgn := NewPgnBase(130306)
 
 	pgn.Fields = append(pgn.Fields,
 		field{

@@ -21,14 +21,14 @@ func NewCanToSignalk() (*canToSignalk, error) {
 		log.Fatal(err)
 	}
 	c := canToSignalk{canboat: canboat, pgn: make(map[uint]interface{})}
-	c.addPgn(130306, pgn.NewPgn130306())
+	c.addPgn(pgn.NewPgn130306())
 
 	return &c, nil
 }
 
-func (c *canToSignalk) addPgn(pgn uint, b pgn.PgnBase) {
-	if b.Init(pgn, c.canboat) {
-		c.pgn[pgn] = b
+func (c *canToSignalk) addPgn(b *pgn.PgnBase) {
+	if b.Init(c.canboat) {
+		c.pgn[b.Pgn] = b
 	}
 }
 
@@ -51,6 +51,9 @@ func (c *canToSignalk) Convert(canSource *socketcan.CanSource) <-chan signalk.De
 				if convertOk {
 					output <- delta
 				}
+			} else {
+				pgn := frame.ID & 0x03FFFF00 >> 8
+				log.Printf("PGN:%d\n", pgn)
 			}
 		}
 		close(output)
