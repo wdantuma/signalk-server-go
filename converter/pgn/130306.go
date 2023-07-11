@@ -34,7 +34,7 @@ func NewPgn130306() *PgnBase {
 			filter: func(fields n2kFields) bool {
 				return !fields.Contains("reference") || fields["reference"] == "Apparent"
 			},
-			value: func(fields n2kFields) float64 {
+			value: func(fields n2kFields) interface{} {
 				angle := Float64Value(fields["windAngle"])
 				if angle > math.Pi {
 					angle = angle - math.Pi*2
