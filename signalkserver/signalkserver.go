@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/converter"
 	"github.com/wdantuma/signalk-server-go/socketcan"
@@ -26,7 +27,8 @@ type signalkServer struct {
 }
 
 func NewSignalkServer() *signalkServer {
-	return &signalkServer{name: SERVER_NAME, version: VERSION}
+	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
+	return &signalkServer{name: SERVER_NAME, version: VERSION, self: self}
 }
 
 func (s *signalkServer) GetName() string {
