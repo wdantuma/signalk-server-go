@@ -27,6 +27,7 @@ func main() {
 	port := flag.Int("port", listenPort, "Listen port")
 	debug := flag.Bool("debug", false, "Enable debugging")
 	staticPath := flag.String("webapppath", "./static", "Path to webapps")
+	mmsi := flag.String("mmsi", "244810236", "Vessel MMSI")
 	flag.Parse()
 
 	listenPort = *port
@@ -45,6 +46,7 @@ func main() {
 	if *debug {
 		signalkServer.EnableDebug()
 	}
+	signalkServer.SetMMSI(*mmsi)
 
 	if *version {
 		fmt.Printf("%s version : %s\n", signalkServer.GetName(), signalkServer.GetVersion())

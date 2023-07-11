@@ -12,4 +12,5 @@ type ServerState interface {
 	GetVersion() string
 	GetSelf() string
 	GetDebug() bool
+	SetMMSI(string)
 }

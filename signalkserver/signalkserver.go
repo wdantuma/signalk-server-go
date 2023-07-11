@@ -15,7 +15,6 @@ import (
 const (
 	SERVER_NAME string = "signalk-server-go"
 	TIME_FORMAT string = "2006-01-02T15:04:05.000Z"
-	SELF        string = "vessels.urn:mrn:imo:mmsi:244810236" //244810236
 	VERSION     string = "0.0.1"
 )
 
@@ -50,6 +49,10 @@ func (s *signalkServer) EnableDebug() {
 	s.debug = true
 }
 
+func (s *signalkServer) SetMMSI(mmsi string) {
+	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
+}
+
 func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	method := "http"
@@ -73,7 +76,7 @@ func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
 			"version": "%s"
 		}
 	}
-`, method, req.Host, wsmethod, req.Host, VERSION)
+`, method, req.Host, wsmethod, req.Host, server.GetVersion())
 }
 
 func (server *signalkServer) SetupServer(ctx context.Context, hostname string, router *mux.Router) *mux.Router {
@@ -89,15 +92,6 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	signalk.HandleFunc("/v1/stream", func(w http.ResponseWriter, r *http.Request) {
 		streamHandler.ServeWs(hub, w, r)
 	})
-
-	// s.Use(handlers.CORS(
-	// 	handlers.AllowCredentials(),
-	// 	handlers.AllowedHeaders([]string{"authorization", "content-type", "dpop"}),
-	// 	handlers.AllowedOriginValidator(func(_ string) bool {
-	// 		return true
-	// 	}),
-	// ))
-	// s.HandleFunc("/", hello)
 
 	// main loop
 	source, err := socketcan.NewCanDumpSource("data/n2kdump.txt")
