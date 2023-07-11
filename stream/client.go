@@ -88,8 +88,10 @@ func (c *client) readPump() {
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		if len(message) > 3 {
 			subscribeMessage := signalk.SubscribeJson{}
-			json.Unmarshal(message, &subscribeMessage)
-			c.filter.UpdateSubscription(subscribeMessage)
+			err := subscribeMessage.UnmarshalJSON(message)
+			if err == nil {
+				c.filter.UpdateSubscription(subscribeMessage)
+			}
 		}
 
 		//c.hub.Broadcast <- message
