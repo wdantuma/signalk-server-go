@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/wdantuma/signalk-server-go/converter"
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
 	"github.com/wdantuma/signalk-server-go/signalk/format"
+	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/socketcan"
 	"github.com/wdantuma/signalk-server-go/stream"
 )
@@ -48,16 +48,6 @@ func signalk(w http.ResponseWriter, req *http.Request) {
 `, method, req.Host, wsmethod, req.Host)
 }
 
-func generate(hub *stream.Hub) {
-	for {
-		message := []byte(`
-		{"context":"vessels.urn:mrn:signalk:uuid:c02711fd-7f19-4272-b642-39344857ea0d","updates":[{"source":{"label":"n2k-sample-data","type":"NMEA2000","pgn":130306,"src":"115"},"$source":"n2k-sample-data.115","timestamp":"2014-08-15T19:07:40.301Z","values":[{"path":"environment.wind.angleApparent","value":0.8206}]}]}
-			`)
-		hub.Broadcast <- message
-		time.Sleep(1 * time.Second)
-	}
-}
-
 func main() {
 	hub := stream.NewHub()
 
@@ -82,7 +72,7 @@ func main() {
 	}
 
 	sk := converter.Convert(source)
-	filterDef := filter.NewFilter()
+	filterDef := filter.NewFilter(signalkserver.SELF)
 	filter := filterDef.Filter(sk)
 	json := format.Json(filter)
 

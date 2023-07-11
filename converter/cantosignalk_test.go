@@ -7,6 +7,7 @@ import (
 
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
 	"github.com/wdantuma/signalk-server-go/signalk/format"
+	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/socketcan"
 )
 
@@ -21,7 +22,7 @@ func TestParse(t *testing.T) {
 	}
 
 	sk := converter.Convert(source)
-	filter := filter.NewFilter()
+	filter := filter.NewFilter(signalkserver.SELF)
 	f := filter.Filter(sk)
 	json := format.Json(f)
 

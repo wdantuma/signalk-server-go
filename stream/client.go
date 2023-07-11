@@ -141,8 +141,9 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	filter := filter.NewFilter()
-	client := &client{hub: hub, filter: filter, conn: conn, send: make(chan []byte, 256)}
+	contextFilter := filter.NewFilter(signalkserver.SELF)
+	contextFilter.Subscribe = filter.ParseSubscribe(r.URL.Query().Get("subscribe"))
+	client := &client{hub: hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
 	client.send <- helloMessage()

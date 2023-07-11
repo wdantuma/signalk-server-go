@@ -12,27 +12,38 @@ const (
 	None
 )
 
-type Filter struct {
-	Subscribe Subscribe
+func ParseSubscribe(subscribe string) Subscribe {
+	switch subscribe {
+	case "all":
+		return All
+	case "none":
+		return None
+	default:
+		return Self
+	}
 }
 
-func NewFilter() *Filter {
-	return &Filter{Subscribe: Self}
+type Filter struct {
+	Subscribe Subscribe
+	Self      string
+}
+
+func NewFilter(self string) *Filter {
+	return &Filter{Subscribe: Self, Self: self}
 }
 
 func (f *Filter) Filter(input <-chan signalk.DeltaJson) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	go func() {
 		for delta := range input {
-			include := true
+			include := false
+			if delta.Context != nil && f.Subscribe == Self && *delta.Context == f.Self {
+				include = true
+			}
+			if f.Subscribe == All {
+				include = true
+			}
 
-			// for _, update := range delta.Updates {
-			// 	if uint(*update.Source.Pgn) == 130306 {
-			// 		include = true
-			// 	}
-			// }
-			//newDelta := DeltaJson{}
-			//delta.Context
 			if include {
 				output <- delta
 			}
