@@ -12,7 +12,9 @@ import (
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
 	"github.com/wdantuma/signalk-server-go/signalk/format"
-	"github.com/wdantuma/signalk-server-go/signalkserver"
+
+	//	"github.com/wdantuma/signalk-server-go/signalkserver"
+	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 )
 
 const (
@@ -28,6 +30,14 @@ const (
 	// Maximum message size allowed from peer.
 	maxMessageSize = 1024
 )
+
+type streamHandler struct {
+	state state.ServerState
+}
+
+func NewStreamHandler(s state.ServerState) *streamHandler {
+	return &streamHandler{state: s}
+}
 
 var (
 	newline = []byte{'\n'}
@@ -52,12 +62,12 @@ type client struct {
 	sendDelta chan signalk.DeltaJson
 }
 
-func helloMessage() []byte {
+func (s *streamHandler) helloMessage() []byte {
 	hello := signalk.HelloJson{}
-	hello.Name = ref.String(signalkserver.SERVER_NAME)
-	hello.Version = (signalk.Version)(signalkserver.VERSION)
+	hello.Name = ref.String(s.state.GetName())
+	hello.Version = (signalk.Version)(s.state.GetVersion())
 	hello.Timestamp = ref.UTCTimeStamp(time.Now())
-	hello.Self = ref.String(signalkserver.SELF)
+	hello.Self = ref.String(s.state.GetSelf())
 	hello.Roles = append(hello.Roles, "master")
 	hello.Roles = append(hello.Roles, "main")
 	helloBytes, _ := json.Marshal(hello)
@@ -146,18 +156,18 @@ func (c *client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func (s *streamHandler) ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	contextFilter := filter.NewFilter(signalkserver.SELF)
+	contextFilter := filter.NewFilter(s.state.GetSelf())
 	contextFilter.Subscribe = filter.ParseSubscribe(r.URL.Query().Get("subscribe"))
 	client := &client{hub: hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256), sendDelta: make(chan signalk.DeltaJson)}
 	client.hub.register <- client
 
-	client.send <- helloMessage()
+	client.send <- s.helloMessage()
 	format.Json(contextFilter.Filter(client.sendDelta), client.send)
 
 	// Allow collection of memory referenced by the caller by doing all work in

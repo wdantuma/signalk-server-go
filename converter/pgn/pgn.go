@@ -9,7 +9,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
-	"github.com/wdantuma/signalk-server-go/signalkserver"
+	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 	"github.com/wdantuma/signalk-server-go/socketcan"
 	"go.einride.tech/can"
 )
@@ -34,6 +34,7 @@ type PgnBase struct {
 	PgnInfo *canboat.PGNInfo
 	Canboat *canboat.Canboat
 	Fields  []field
+	//State   state.ServerState
 }
 
 type Pgn interface {
@@ -45,10 +46,10 @@ func NewPgnBase(pgn uint) *PgnBase {
 
 }
 
-func (base *PgnBase) GetDelta(frame socketcan.ExtendedFrame, canSource *socketcan.CanSource) signalk.DeltaJson {
+func (base *PgnBase) GetDelta(state state.ServerState, frame socketcan.ExtendedFrame, canSource *socketcan.CanSource) signalk.DeltaJson {
 	src := frame.ID & 0xFF
 	delta := signalk.DeltaJson{}
-	delta.Context = ref.String(signalkserver.SELF)
+	delta.Context = ref.String(state.GetSelf())
 	update := signalk.DeltaJsonUpdatesElem{}
 	update.Timestamp = ref.UTCTimeStamp(time.Now()) // TODO get from source
 	update.Source = &signalk.Source{Pgn: ref.Float64(float64(base.Pgn)),
@@ -61,8 +62,8 @@ func (base *PgnBase) GetDelta(frame socketcan.ExtendedFrame, canSource *socketca
 	return delta
 }
 
-func (pgn *PgnBase) Convert(frame socketcan.ExtendedFrame, canSource *socketcan.CanSource) (signalk.DeltaJson, bool) {
-	delta := pgn.GetDelta(frame, canSource)
+func (pgn *PgnBase) Convert(state state.ServerState, frame socketcan.ExtendedFrame, canSource *socketcan.CanSource) (signalk.DeltaJson, bool) {
+	delta := pgn.GetDelta(state, frame, canSource)
 
 	fields := make(n2kFields)
 

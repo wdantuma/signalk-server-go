@@ -6,6 +6,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/converter/pgn"
 	"github.com/wdantuma/signalk-server-go/signalk"
+	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 	"github.com/wdantuma/signalk-server-go/socketcan"
 )
 
@@ -54,7 +55,7 @@ func Reassemble(frame socketcan.ExtendedFrame, length int, input <-chan socketca
 	return frame
 }
 
-func (c *canToSignalk) Convert(canSource *socketcan.CanSource) <-chan signalk.DeltaJson {
+func (c *canToSignalk) Convert(state state.ServerState, canSource *socketcan.CanSource) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	go func() {
 		for {
@@ -71,13 +72,13 @@ func (c *canToSignalk) Convert(canSource *socketcan.CanSource) <-chan signalk.De
 						}
 					}
 
-					delta, convertOk := pgnConverter.Convert(frame, canSource)
+					delta, convertOk := pgnConverter.Convert(state, frame, canSource)
 					if convertOk {
 						output <- delta
 					}
 				} else {
-					//pgn := frame.ID & 0x03FFFF00 >> 8
-					//log.Printf("PGN:%d\n", pgn)
+					pgn := frame.ID & 0x03FFFF00 >> 8
+					log.Printf("PGN:%d\n", pgn)
 				}
 			} else {
 				break
