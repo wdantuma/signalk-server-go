@@ -23,6 +23,7 @@ type signalkServer struct {
 	name    string
 	version string
 	self    string
+	debug   bool
 }
 
 func NewSignalkServer() *signalkServer {
@@ -39,6 +40,14 @@ func (s *signalkServer) GetVersion() string {
 
 func (s *signalkServer) GetSelf() string {
 	return s.self
+}
+
+func (s *signalkServer) GetDebug() bool {
+	return s.debug
+}
+
+func (s *signalkServer) EnableDebug() {
+	s.debug = true
 }
 
 func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {

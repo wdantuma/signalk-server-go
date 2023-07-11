@@ -11,4 +11,5 @@ type ServerState interface {
 	GetName() string
 	GetVersion() string
 	GetSelf() string
+	GetDebug() bool
 }

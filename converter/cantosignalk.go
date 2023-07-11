@@ -78,7 +78,9 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource *socketcan.Can
 					}
 				} else {
 					pgn := frame.ID & 0x03FFFF00 >> 8
-					log.Printf("PGN:%d\n", pgn)
+					if state.GetDebug() {
+						log.Printf("PGN:%d\n", pgn)
+					}
 				}
 			} else {
 				break
