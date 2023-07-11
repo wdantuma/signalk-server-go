@@ -6,8 +6,11 @@ import (
 	"github.com/wdantuma/signalk-server-go/signalk"
 )
 
-func Json(input <-chan signalk.DeltaJson) <-chan []byte {
-	output := make(chan []byte)
+func Json(input <-chan signalk.DeltaJson, output chan []byte) chan []byte {
+	if output == nil {
+		output = make(chan []byte)
+	}
+
 	go func() {
 		for delta := range input {
 			deltaBytes, _ := json.Marshal(delta)

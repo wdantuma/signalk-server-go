@@ -11,6 +11,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
+	"github.com/wdantuma/signalk-server-go/signalk/format"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 )
 
@@ -47,7 +48,8 @@ type client struct {
 	conn *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	send      chan []byte
+	sendDelta chan signalk.DeltaJson
 }
 
 func helloMessage() []byte {
@@ -84,6 +86,12 @@ func (c *client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		if len(message) > 3 {
+			subscribeMessage := signalk.SubscribeJson{}
+			json.Unmarshal(message, &subscribeMessage)
+			c.filter.UpdateSubscription(subscribeMessage)
+		}
+
 		//c.hub.Broadcast <- message
 	}
 }
@@ -99,6 +107,7 @@ func (c *client) writePump() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
@@ -143,10 +152,11 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	contextFilter := filter.NewFilter(signalkserver.SELF)
 	contextFilter.Subscribe = filter.ParseSubscribe(r.URL.Query().Get("subscribe"))
-	client := &client{hub: hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256)}
+	client := &client{hub: hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256), sendDelta: make(chan signalk.DeltaJson)}
 	client.hub.register <- client
 
 	client.send <- helloMessage()
+	format.Json(contextFilter.Filter(client.sendDelta), client.send)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.

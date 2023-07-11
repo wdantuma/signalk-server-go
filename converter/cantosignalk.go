@@ -76,8 +76,8 @@ func (c *canToSignalk) Convert(canSource *socketcan.CanSource) <-chan signalk.De
 						output <- delta
 					}
 				} else {
-					pgn := frame.ID & 0x03FFFF00 >> 8
-					log.Printf("PGN:%d\n", pgn)
+					//pgn := frame.ID & 0x03FFFF00 >> 8
+					//log.Printf("PGN:%d\n", pgn)
 				}
 			} else {
 				break

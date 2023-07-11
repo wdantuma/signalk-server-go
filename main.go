@@ -8,9 +8,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/wdantuma/signalk-server-go/converter"
-	"github.com/wdantuma/signalk-server-go/signalk/filter"
-	"github.com/wdantuma/signalk-server-go/signalk/format"
-	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/socketcan"
 	"github.com/wdantuma/signalk-server-go/stream"
 )
@@ -72,13 +69,10 @@ func main() {
 	}
 
 	sk := converter.Convert(source)
-	filterDef := filter.NewFilter(signalkserver.SELF)
-	filter := filterDef.Filter(sk)
-	json := format.Json(filter)
 
 	go func() {
-		for bytes := range json {
-			hub.Broadcast <- bytes
+		for bytes := range sk {
+			hub.BroadcastDelta <- bytes
 		}
 	}()
 

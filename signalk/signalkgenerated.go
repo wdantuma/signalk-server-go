@@ -6,65 +6,496 @@ import "encoding/json"
 import "fmt"
 import "reflect"
 
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *CommonValueFields) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["$source"]; !ok || v == nil {
+		return fmt.Errorf("field $source in CommonValueFields: required")
+	}
+	if v, ok := raw["timestamp"]; !ok || v == nil {
+		return fmt.Errorf("field timestamp in CommonValueFields: required")
+	}
+	type Plain CommonValueFields
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = CommonValueFields(plain)
+	return nil
+}
+
+// Maritime Mobile Service Identity (MMSI) for . Has to be 9 digits. See
+// http://en.wikipedia.org/wiki/Maritime_Mobile_Service_Identity for information.
+type AtonMmsi string
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *SubscribeJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["context"]; !ok || v == nil {
+		return fmt.Errorf("field context in SubscribeJson: required")
+	}
+	if v, ok := raw["subscribe"]; !ok || v == nil {
+		return fmt.Errorf("field subscribe in SubscribeJson: required")
+	}
+	type Plain SubscribeJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = SubscribeJson(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *SubscribeJsonSubscribeElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	type Plain SubscribeJsonSubscribeElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["format"]; !ok || v == nil {
+		plain.Format = "delta"
+	}
+	if v, ok := raw["minPeriod"]; !ok || v == nil {
+		plain.MinPeriod = 200.0
+	}
+	if v, ok := raw["period"]; !ok || v == nil {
+		plain.Period = 1000.0
+	}
+	if v, ok := raw["policy"]; !ok || v == nil {
+		plain.Policy = "ideal"
+	}
+	*j = SubscribeJsonSubscribeElem(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DiscoveryJsonServer) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["id"]; !ok || v == nil {
+		return fmt.Errorf("field id in DiscoveryJsonServer: required")
+	}
+	if v, ok := raw["version"]; !ok || v == nil {
+		return fmt.Errorf("field version in DiscoveryJsonServer: required")
+	}
+	type Plain DiscoveryJsonServer
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DiscoveryJsonServer(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DeltaJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["updates"]; !ok || v == nil {
+		return fmt.Errorf("field updates in DeltaJson: required")
+	}
+	type Plain DeltaJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DeltaJson(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DeltaJsonUpdatesElemValuesElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["path"]; !ok || v == nil {
+		return fmt.Errorf("field path in DeltaJsonUpdatesElemValuesElem: required")
+	}
+	if v, ok := raw["value"]; !ok || v == nil {
+		return fmt.Errorf("field value in DeltaJsonUpdatesElemValuesElem: required")
+	}
+	type Plain DeltaJsonUpdatesElemValuesElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DeltaJsonUpdatesElemValuesElem(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *DeltaJsonUpdatesElemMetaElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["path"]; !ok || v == nil {
+		return fmt.Errorf("field path in DeltaJsonUpdatesElemMetaElem: required")
+	}
+	if v, ok := raw["value"]; !ok || v == nil {
+		return fmt.Errorf("field value in DeltaJsonUpdatesElemMetaElem: required")
+	}
+	type Plain DeltaJsonUpdatesElemMetaElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = DeltaJsonUpdatesElemMetaElem(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *HelloJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["roles"]; !ok || v == nil {
+		return fmt.Errorf("field roles in HelloJson: required")
+	}
+	if v, ok := raw["version"]; !ok || v == nil {
+		return fmt.Errorf("field version in HelloJson: required")
+	}
+	type Plain HelloJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if len(plain.Roles) < 2 {
+		return fmt.Errorf("field %s length: must be >= %d", "roles", 2)
+	}
+	if len(plain.Roles) > 2 {
+		return fmt.Errorf("field %s length: must be <= %d", "roles", 2)
+	}
+	*j = HelloJson(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *HelloJsonRolesElem) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_HelloJsonRolesElem {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_HelloJsonRolesElem, v)
+	}
+	*j = HelloJsonRolesElem(v)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *SignalkJson) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["self"]; !ok || v == nil {
+		return fmt.Errorf("field self in SignalkJson: required")
+	}
+	if v, ok := raw["version"]; !ok || v == nil {
+		return fmt.Errorf("field version in SignalkJson: required")
+	}
+	type Plain SignalkJson
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	*j = SignalkJson(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Attr) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	type Plain Attr
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["_group"]; !ok || v == nil {
+		plain.Group = "self"
+	}
+	if v, ok := raw["_mode"]; !ok || v == nil {
+		plain.Mode = 644.0
+	}
+	if v, ok := raw["_owner"]; !ok || v == nil {
+		plain.Owner = "self"
+	}
+	*j = Attr(plain)
+	return nil
+}
+
 // Maritime Mobile Service Identity (MMSI) for aircraft. Has to be 9 digits. See
 // http://en.wikipedia.org/wiki/Maritime_Mobile_Service_Identity for information.
 type AircraftMmsi string
 
 type AlarmMethodEnum string
 
-const AlarmMethodEnumSound AlarmMethodEnum = "sound"
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *NullValue) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	type Plain NullValue
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if plain.Value != nil {
+		return fmt.Errorf("field %s: must be null", "value")
+	}
+	*j = NullValue(plain)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *AlarmMethodEnum) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_AlarmMethodEnum {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmMethodEnum, v)
+	}
+	*j = AlarmMethodEnum(v)
+	return nil
+}
+
 const AlarmMethodEnumVisual AlarmMethodEnum = "visual"
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Source) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["label"]; !ok || v == nil {
+		return fmt.Errorf("field label in Source: required")
+	}
+	type Plain Source
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["type"]; !ok || v == nil {
+		plain.Type = "NMEA2000"
+	}
+	*j = Source(plain)
+	return nil
+}
 
 type AlarmState string
 
-const AlarmStateAlarm AlarmState = "alarm"
-const AlarmStateAlert AlarmState = "alert"
-const AlarmStateEmergency AlarmState = "emergency"
+const AlarmMethodEnumSound AlarmMethodEnum = "sound"
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *AlarmState) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_AlarmState {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmState, v)
+	}
+	*j = AlarmState(v)
+	return nil
+}
+
 const AlarmStateNominal AlarmState = "nominal"
 const AlarmStateNormal AlarmState = "normal"
+const AlarmStateAlert AlarmState = "alert"
 const AlarmStateWarn AlarmState = "warn"
+const AlarmStateAlarm AlarmState = "alarm"
+const AlarmStateEmergency AlarmState = "emergency"
 
-// Maritime Mobile Service Identity (MMSI) for . Has to be 9 digits. See
-// http://en.wikipedia.org/wiki/Maritime_Mobile_Service_Identity for information.
-type AtonMmsi string
-
-// Filesystem specific data, e.g. security, possibly more later.
-type Attr struct {
-	// The group owning this resource.
-	Group string `json:"_group,omitempty" yaml:"_group,omitempty" mapstructure:"_group,omitempty"`
-
-	// Unix style permissions, often written in `owner:group:other` form, `-rw-r--r--`
-	Mode int `json:"_mode,omitempty" yaml:"_mode,omitempty" mapstructure:"_mode,omitempty"`
-
-	// The owner of this resource.
-	Owner string `json:"_owner,omitempty" yaml:"_owner,omitempty" mapstructure:"_owner,omitempty"`
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Meta) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["description"]; !ok || v == nil {
+		return fmt.Errorf("field description in Meta: required")
+	}
+	type Plain Meta
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["alarmMethod"]; !ok || v == nil {
+		plain.AlarmMethod = []MetaAlarmMethodElem{
+			"visual",
+			"sound",
+		}
+	}
+	if v, ok := raw["alertMethod"]; !ok || v == nil {
+		plain.AlertMethod = []MetaAlertMethodElem{
+			"visual",
+		}
+	}
+	if v, ok := raw["emergencyMethod"]; !ok || v == nil {
+		plain.EmergencyMethod = []MetaEmergencyMethodElem{
+			"visual",
+			"sound",
+		}
+	}
+	if v, ok := raw["warnMethod"]; !ok || v == nil {
+		plain.WarnMethod = []MetaWarnMethodElem{
+			"visual",
+		}
+	}
+	*j = Meta(plain)
+	return nil
 }
 
-type CommonValueFields struct {
-	// Source corresponds to the JSON schema field "$source".
-	Source SourceRef `json:"$source" yaml:"$source" mapstructure:"$source"`
-
-	// Attr corresponds to the JSON schema field "_attr".
-	Attr *Attr `json:"_attr,omitempty" yaml:"_attr,omitempty" mapstructure:"_attr,omitempty"`
-
-	// Meta corresponds to the JSON schema field "meta".
-	Meta *Meta `json:"meta,omitempty" yaml:"meta,omitempty" mapstructure:"meta,omitempty"`
-
-	// Pgn corresponds to the JSON schema field "pgn".
-	Pgn *float64 `json:"pgn,omitempty" yaml:"pgn,omitempty" mapstructure:"pgn,omitempty"`
-
-	// Sentence corresponds to the JSON schema field "sentence".
-	Sentence *string `json:"sentence,omitempty" yaml:"sentence,omitempty" mapstructure:"sentence,omitempty"`
-
-	// Timestamp corresponds to the JSON schema field "timestamp".
-	Timestamp Timestamp `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *MetaZonesElem) UnmarshalJSON(b []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	if v, ok := raw["state"]; !ok || v == nil {
+		return fmt.Errorf("field state in MetaZonesElem: required")
+	}
+	type Plain MetaZonesElem
+	var plain Plain
+	if err := json.Unmarshal(b, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["message"]; !ok || v == nil {
+		plain.Message = "Warning"
+	}
+	*j = MetaZonesElem(plain)
+	return nil
 }
 
-// Data should be of type number.
-type DatetimeValue map[string]interface{}
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *MetaDisplayScaleType) UnmarshalJSON(b []byte) error {
+	var v string
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_MetaDisplayScaleType {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_MetaDisplayScaleType, v)
+	}
+	*j = MetaDisplayScaleType(v)
+	return nil
+}
 
-// Reusable definitions of core object types
-type DefinitionsJson map[string]interface{}
+// A zone used to define the display and alarm state when the value is in between
+// bottom and top.
+type MetaZonesElem struct {
+	// The lowest number in this zone
+	Lower *float64 `json:"lower,omitempty" yaml:"lower,omitempty" mapstructure:"lower,omitempty"`
+
+	// The message to display for the alarm.
+	Message string `json:"message,omitempty" yaml:"message,omitempty" mapstructure:"message,omitempty"`
+
+	// State corresponds to the JSON schema field "state".
+	State AlarmState `json:"state" yaml:"state" mapstructure:"state"`
+
+	// The highest value in this zone
+	Upper *float64 `json:"upper,omitempty" yaml:"upper,omitempty" mapstructure:"upper,omitempty"`
+}
+
+// Schema for SignalK discovery resources used to locate server endpoints.
+type DiscoveryJson struct {
+	// The set of endpoints known to this server
+	Endpoints DiscoveryJsonEndpoints `json:"endpoints,omitempty" yaml:"endpoints,omitempty" mapstructure:"endpoints,omitempty"`
+
+	// Information about this server
+	Server *DiscoveryJsonServer `json:"server,omitempty" yaml:"server,omitempty" mapstructure:"server,omitempty"`
+}
+
+// Information about this server
+type DiscoveryJsonServer struct {
+	// The id of this server (signalk-server-node, iKommunicate, etc.)
+	Id string `json:"id" yaml:"id" mapstructure:"id"`
+
+	// The version of this server (not limited to signalk versioning rules).
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
+}
+
+type MetaAlarmMethodElem interface{}
+
+const MetaDisplayScaleTypeLinear MetaDisplayScaleType = "linear"
+const MetaDisplayScaleTypeLogarithmic MetaDisplayScaleType = "logarithmic"
+
+// The set of endpoints known to this server
+type DiscoveryJsonEndpoints map[string]interface{}
+
+const MetaDisplayScaleTypePower MetaDisplayScaleType = "power"
+
+// Gives details of the display scale against which the value should be displayed
+type MetaDisplayScale struct {
+	// The suggested lower limit for the pointer (or equivalent) on the display
+	Lower *float64 `json:"lower,omitempty" yaml:"lower,omitempty" mapstructure:"lower,omitempty"`
+
+	// The power to use when the displayScale/type is set to 'power'. Can be any
+	// numeric value except zero.
+	Power *float64 `json:"power,omitempty" yaml:"power,omitempty" mapstructure:"power,omitempty"`
+
+	// The suggested type of scale to use
+	Type *MetaDisplayScaleType `json:"type,omitempty" yaml:"type,omitempty" mapstructure:"type,omitempty"`
+
+	// The suggested upper limit for the pointer (or equivalent) on the display
+	Upper *float64 `json:"upper,omitempty" yaml:"upper,omitempty" mapstructure:"upper,omitempty"`
+}
+
+type MetaEmergencyMethodElem interface{}
+
+type MetaProperties map[string]interface{}
+
+type MetaWarnMethodElem interface{}
 
 // Schema for defining updates and subscriptions to parts of a SignalK data model,
 // for example for communicating updates of data
@@ -92,81 +523,6 @@ type DeltaJsonUpdatesElem struct {
 	// Values corresponds to the JSON schema field "values".
 	Values []DeltaJsonUpdatesElemValuesElem `json:"values,omitempty" yaml:"values,omitempty" mapstructure:"values,omitempty"`
 }
-
-type DeltaJsonUpdatesElemMetaElem struct {
-	// The local path to the data value
-	Path string `json:"path" yaml:"path" mapstructure:"path"`
-
-	// Value corresponds to the JSON schema field "value".
-	Value Meta `json:"value" yaml:"value" mapstructure:"value"`
-}
-
-type DeltaJsonUpdatesElemValuesElem struct {
-	// The local path to the data value
-	Path string `json:"path" yaml:"path" mapstructure:"path"`
-
-	// Value corresponds to the JSON schema field "value".
-	Value interface{} `json:"value" yaml:"value" mapstructure:"value"`
-}
-
-// Schema for SignalK discovery resources used to locate server endpoints.
-type DiscoveryJson struct {
-	// The set of endpoints known to this server
-	Endpoints DiscoveryJsonEndpoints `json:"endpoints,omitempty" yaml:"endpoints,omitempty" mapstructure:"endpoints,omitempty"`
-
-	// Information about this server
-	Server *DiscoveryJsonServer `json:"server,omitempty" yaml:"server,omitempty" mapstructure:"server,omitempty"`
-}
-
-// The set of endpoints known to this server
-type DiscoveryJsonEndpoints map[string]interface{}
-
-// Information about this server
-type DiscoveryJsonServer struct {
-	// The id of this server (signalk-server-node, iKommunicate, etc.)
-	Id string `json:"id" yaml:"id" mapstructure:"id"`
-
-	// The version of this server (not limited to signalk versioning rules).
-	Version string `json:"version" yaml:"version" mapstructure:"version"`
-}
-
-// A geohash (see http://geohash.org)
-type Geohash string
-
-// Schema for defining the hello message passed from the server to a client
-// following succesful websocket connection
-type HelloJson struct {
-	// The name of the Signal K server software
-	Name *string `json:"name,omitempty" yaml:"name,omitempty" mapstructure:"name,omitempty"`
-
-	// Playback rate for history playback connections: 1 is real time, 2 is two times
-	// and 0.5 half the real time rate
-	PlaybackRate *float64 `json:"playbackRate,omitempty" yaml:"playbackRate,omitempty" mapstructure:"playbackRate,omitempty"`
-
-	// The designated roles of the server
-	Roles []HelloJsonRolesElem `json:"roles" yaml:"roles" mapstructure:"roles"`
-
-	// This holds the context (prefix + UUID, MMSI or URL in dot notation) of the
-	// server's self object.
-	Self *string `json:"self,omitempty" yaml:"self,omitempty" mapstructure:"self,omitempty"`
-
-	// Starttime for history playback connections
-	StartTime *Timestamp `json:"startTime,omitempty" yaml:"startTime,omitempty" mapstructure:"startTime,omitempty"`
-
-	// Timestamp corresponds to the JSON schema field "timestamp".
-	Timestamp *Timestamp `json:"timestamp,omitempty" yaml:"timestamp,omitempty" mapstructure:"timestamp,omitempty"`
-
-	// Version of the schema and APIs that this data is using in canonical format i.e.
-	// 1.5.0.
-	Version Version `json:"version" yaml:"version" mapstructure:"version"`
-}
-
-type HelloJsonRolesElem string
-
-const HelloJsonRolesElemAux HelloJsonRolesElem = "aux"
-const HelloJsonRolesElemMain HelloJsonRolesElem = "main"
-const HelloJsonRolesElemMaster HelloJsonRolesElem = "master"
-const HelloJsonRolesElemSlave HelloJsonRolesElem = "slave"
 
 // Provides meta data to enable alarm and display configuration.
 type Meta struct {
@@ -220,54 +576,104 @@ type Meta struct {
 	Zones []MetaZonesElem `json:"zones,omitempty" yaml:"zones,omitempty" mapstructure:"zones,omitempty"`
 }
 
-type MetaAlarmMethodElem interface{}
+type DeltaJsonUpdatesElemValuesElem struct {
+	// The local path to the data value
+	Path string `json:"path" yaml:"path" mapstructure:"path"`
 
-type MetaAlertMethodElem interface{}
+	// Value corresponds to the JSON schema field "value".
+	Value interface{} `json:"value" yaml:"value" mapstructure:"value"`
+}
 
-// Gives details of the display scale against which the value should be displayed
-type MetaDisplayScale struct {
-	// The suggested lower limit for the pointer (or equivalent) on the display
-	Lower *float64 `json:"lower,omitempty" yaml:"lower,omitempty" mapstructure:"lower,omitempty"`
+type DeltaJsonUpdatesElemMetaElem struct {
+	// The local path to the data value
+	Path string `json:"path" yaml:"path" mapstructure:"path"`
 
-	// The power to use when the displayScale/type is set to 'power'. Can be any
-	// numeric value except zero.
-	Power *float64 `json:"power,omitempty" yaml:"power,omitempty" mapstructure:"power,omitempty"`
+	// Value corresponds to the JSON schema field "value".
+	Value Meta `json:"value" yaml:"value" mapstructure:"value"`
+}
 
-	// The suggested type of scale to use
-	Type *MetaDisplayScaleType `json:"type,omitempty" yaml:"type,omitempty" mapstructure:"type,omitempty"`
+// Schema for defining the hello message passed from the server to a client
+// following succesful websocket connection
+type HelloJson struct {
+	// The name of the Signal K server software
+	Name *string `json:"name,omitempty" yaml:"name,omitempty" mapstructure:"name,omitempty"`
 
-	// The suggested upper limit for the pointer (or equivalent) on the display
-	Upper *float64 `json:"upper,omitempty" yaml:"upper,omitempty" mapstructure:"upper,omitempty"`
+	// Playback rate for history playback connections: 1 is real time, 2 is two times
+	// and 0.5 half the real time rate
+	PlaybackRate *float64 `json:"playbackRate,omitempty" yaml:"playbackRate,omitempty" mapstructure:"playbackRate,omitempty"`
+
+	// The designated roles of the server
+	Roles []HelloJsonRolesElem `json:"roles" yaml:"roles" mapstructure:"roles"`
+
+	// This holds the context (prefix + UUID, MMSI or URL in dot notation) of the
+	// server's self object.
+	Self *string `json:"self,omitempty" yaml:"self,omitempty" mapstructure:"self,omitempty"`
+
+	// Starttime for history playback connections
+	StartTime *Timestamp `json:"startTime,omitempty" yaml:"startTime,omitempty" mapstructure:"startTime,omitempty"`
+
+	// Timestamp corresponds to the JSON schema field "timestamp".
+	Timestamp *Timestamp `json:"timestamp,omitempty" yaml:"timestamp,omitempty" mapstructure:"timestamp,omitempty"`
+
+	// Version of the schema and APIs that this data is using in canonical format i.e.
+	// 1.5.0.
+	Version Version `json:"version" yaml:"version" mapstructure:"version"`
 }
 
 type MetaDisplayScaleType string
 
-const MetaDisplayScaleTypeLinear MetaDisplayScaleType = "linear"
-const MetaDisplayScaleTypeLogarithmic MetaDisplayScaleType = "logarithmic"
-const MetaDisplayScaleTypePower MetaDisplayScaleType = "power"
-const MetaDisplayScaleTypeSquareroot MetaDisplayScaleType = "squareroot"
+// Data should be of type number.
+type DatetimeValue map[string]interface{}
 
-type MetaEmergencyMethodElem interface{}
+// A geohash (see http://geohash.org)
+type Geohash string
 
-type MetaProperties map[string]interface{}
+const HelloJsonRolesElemSlave HelloJsonRolesElem = "slave"
+const HelloJsonRolesElemAux HelloJsonRolesElem = "aux"
 
-type MetaWarnMethodElem interface{}
+type CommonValueFields struct {
+	// Source corresponds to the JSON schema field "$source".
+	Source SourceRef `json:"$source" yaml:"$source" mapstructure:"$source"`
 
-// A zone used to define the display and alarm state when the value is in between
-// bottom and top.
-type MetaZonesElem struct {
-	// The lowest number in this zone
-	Lower *float64 `json:"lower,omitempty" yaml:"lower,omitempty" mapstructure:"lower,omitempty"`
+	// Attr corresponds to the JSON schema field "_attr".
+	Attr *Attr `json:"_attr,omitempty" yaml:"_attr,omitempty" mapstructure:"_attr,omitempty"`
 
-	// The message to display for the alarm.
-	Message string `json:"message,omitempty" yaml:"message,omitempty" mapstructure:"message,omitempty"`
+	// Meta corresponds to the JSON schema field "meta".
+	Meta *Meta `json:"meta,omitempty" yaml:"meta,omitempty" mapstructure:"meta,omitempty"`
 
-	// State corresponds to the JSON schema field "state".
-	State AlarmState `json:"state" yaml:"state" mapstructure:"state"`
+	// Pgn corresponds to the JSON schema field "pgn".
+	Pgn *float64 `json:"pgn,omitempty" yaml:"pgn,omitempty" mapstructure:"pgn,omitempty"`
 
-	// The highest value in this zone
-	Upper *float64 `json:"upper,omitempty" yaml:"upper,omitempty" mapstructure:"upper,omitempty"`
+	// Sentence corresponds to the JSON schema field "sentence".
+	Sentence *string `json:"sentence,omitempty" yaml:"sentence,omitempty" mapstructure:"sentence,omitempty"`
+
+	// Timestamp corresponds to the JSON schema field "timestamp".
+	Timestamp Timestamp `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
 }
+
+const HelloJsonRolesElemMain HelloJsonRolesElem = "main"
+const HelloJsonRolesElemMaster HelloJsonRolesElem = "master"
+
+type HelloJsonRolesElem string
+
+// Filesystem specific data, e.g. security, possibly more later.
+type Attr struct {
+	// The group owning this resource.
+	Group string `json:"_group,omitempty" yaml:"_group,omitempty" mapstructure:"_group,omitempty"`
+
+	// Unix style permissions, often written in `owner:group:other` form, `-rw-r--r--`
+	Mode int `json:"_mode,omitempty" yaml:"_mode,omitempty" mapstructure:"_mode,omitempty"`
+
+	// The owner of this resource.
+	Owner string `json:"_owner,omitempty" yaml:"_owner,omitempty" mapstructure:"_owner,omitempty"`
+}
+
+// Reusable definitions of core object types
+type DefinitionsJson map[string]interface{}
+
+type MetaAlertMethodElem interface{}
+
+const MetaDisplayScaleTypeSquareroot MetaDisplayScaleType = "squareroot"
 
 // Maritime Mobile Service Identity (MMSI). Has to be 9 digits. See
 // http://en.wikipedia.org/wiki/Maritime_Mobile_Service_Identity for information.
@@ -433,6 +839,42 @@ type SourcesJson map[string]interface{}
 // Data should be of type number.
 type StringValue map[string]interface{}
 
+// A message to allow a client to subscribe for data updates from a signalk server
+type SubscribeJson struct {
+	// The root path for all subsequent paths, usually a vessel's path.
+	Context string `json:"context" yaml:"context" mapstructure:"context"`
+
+	// A reply queue that is used in STOMP and MQTT messages where there are no
+	// session facilities.
+	ReplyTo *string `json:"reply-to,omitempty" yaml:"reply-to,omitempty" mapstructure:"reply-to,omitempty"`
+
+	// An array of paths to subscribe to, with optional criteria
+	Subscribe []SubscribeJsonSubscribeElem `json:"subscribe" yaml:"subscribe" mapstructure:"subscribe"`
+
+	// An optional session key that is used in STOMP and MQTT messages where there are
+	// no session facilities
+	WebsocketConnectionkey *string `json:"websocket.connectionkey,omitempty" yaml:"websocket.connectionkey,omitempty" mapstructure:"websocket.connectionkey,omitempty"`
+}
+
+// A path object with optional criteria to control output
+type SubscribeJsonSubscribeElem struct {
+	// The signal K format to use (full/delta) for the message.
+	Format string `json:"format,omitempty" yaml:"format,omitempty" mapstructure:"format,omitempty"`
+
+	// If policy=immediate or ideal, consequetive messages will be buffered until
+	// minPeriod has expired so the reciever is not swamped.
+	MinPeriod int `json:"minPeriod,omitempty" yaml:"minPeriod,omitempty" mapstructure:"minPeriod,omitempty"`
+
+	// The path to subscribe to.
+	Path *string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
+
+	// The subscription will be sent every period millisecs.
+	Period int `json:"period,omitempty" yaml:"period,omitempty" mapstructure:"period,omitempty"`
+
+	// The policy for sending messages (instant/ideal/fixed).
+	Policy string `json:"policy,omitempty" yaml:"policy,omitempty" mapstructure:"policy,omitempty"`
+}
+
 // RFC 3339 (UTC only without local offset) string representing date and time.
 type Timestamp string
 
@@ -509,255 +951,10 @@ type Waypoint struct {
 	Position Position `json:"position,omitempty" yaml:"position,omitempty" mapstructure:"position,omitempty"`
 }
 
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJsonUpdatesElemMetaElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["path"]; !ok || v == nil {
-		return fmt.Errorf("field path in DeltaJsonUpdatesElemMetaElem: required")
-	}
-	if v, ok := raw["value"]; !ok || v == nil {
-		return fmt.Errorf("field value in DeltaJsonUpdatesElemMetaElem: required")
-	}
-	type Plain DeltaJsonUpdatesElemMetaElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJsonUpdatesElemMetaElem(plain)
-	return nil
-}
-
-var enumValues_HelloJsonRolesElem = []interface{}{
-	"master",
-	"main",
-	"aux",
-	"slave",
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *MetaDisplayScaleType) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_MetaDisplayScaleType {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_MetaDisplayScaleType, v)
-	}
-	*j = MetaDisplayScaleType(v)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *CommonValueFields) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["$source"]; !ok || v == nil {
-		return fmt.Errorf("field $source in CommonValueFields: required")
-	}
-	if v, ok := raw["timestamp"]; !ok || v == nil {
-		return fmt.Errorf("field timestamp in CommonValueFields: required")
-	}
-	type Plain CommonValueFields
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = CommonValueFields(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *SignalkJson) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["self"]; !ok || v == nil {
-		return fmt.Errorf("field self in SignalkJson: required")
-	}
-	if v, ok := raw["version"]; !ok || v == nil {
-		return fmt.Errorf("field version in SignalkJson: required")
-	}
-	type Plain SignalkJson
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = SignalkJson(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *Source) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["label"]; !ok || v == nil {
-		return fmt.Errorf("field label in Source: required")
-	}
-	type Plain Source
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["type"]; !ok || v == nil {
-		plain.Type = "NMEA2000"
-	}
-	*j = Source(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *NullValue) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	type Plain NullValue
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if plain.Value != nil {
-		return fmt.Errorf("field %s: must be null", "value")
-	}
-	*j = NullValue(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *HelloJsonRolesElem) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_HelloJsonRolesElem {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_HelloJsonRolesElem, v)
-	}
-	*j = HelloJsonRolesElem(v)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *HelloJson) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["roles"]; !ok || v == nil {
-		return fmt.Errorf("field roles in HelloJson: required")
-	}
-	if v, ok := raw["version"]; !ok || v == nil {
-		return fmt.Errorf("field version in HelloJson: required")
-	}
-	type Plain HelloJson
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if len(plain.Roles) < 2 {
-		return fmt.Errorf("field %s length: must be >= %d", "roles", 2)
-	}
-	if len(plain.Roles) > 2 {
-		return fmt.Errorf("field %s length: must be <= %d", "roles", 2)
-	}
-	*j = HelloJson(plain)
-	return nil
-}
-
-var enumValues_MetaDisplayScaleType = []interface{}{
-	"linear",
-	"logarithmic",
-	"squareroot",
-	"power",
-}
 var enumValues_AlarmMethodEnum = []interface{}{
 	"visual",
 	"sound",
 }
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *MetaZonesElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["state"]; !ok || v == nil {
-		return fmt.Errorf("field state in MetaZonesElem: required")
-	}
-	type Plain MetaZonesElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["message"]; !ok || v == nil {
-		plain.Message = "Warning"
-	}
-	*j = MetaZonesElem(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJsonUpdatesElemValuesElem) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["path"]; !ok || v == nil {
-		return fmt.Errorf("field path in DeltaJsonUpdatesElemValuesElem: required")
-	}
-	if v, ok := raw["value"]; !ok || v == nil {
-		return fmt.Errorf("field value in DeltaJsonUpdatesElemValuesElem: required")
-	}
-	type Plain DeltaJsonUpdatesElemValuesElem
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJsonUpdatesElemValuesElem(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *AlarmState) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_AlarmState {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmState, v)
-	}
-	*j = AlarmState(v)
-	return nil
-}
-
 var enumValues_AlarmState = []interface{}{
 	"nominal",
 	"normal",
@@ -766,126 +963,15 @@ var enumValues_AlarmState = []interface{}{
 	"alarm",
 	"emergency",
 }
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DeltaJson) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["updates"]; !ok || v == nil {
-		return fmt.Errorf("field updates in DeltaJson: required")
-	}
-	type Plain DeltaJson
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DeltaJson(plain)
-	return nil
+var enumValues_HelloJsonRolesElem = []interface{}{
+	"master",
+	"main",
+	"aux",
+	"slave",
 }
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *Meta) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["description"]; !ok || v == nil {
-		return fmt.Errorf("field description in Meta: required")
-	}
-	type Plain Meta
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["alarmMethod"]; !ok || v == nil {
-		plain.AlarmMethod = []MetaAlarmMethodElem{
-			"visual",
-			"sound",
-		}
-	}
-	if v, ok := raw["alertMethod"]; !ok || v == nil {
-		plain.AlertMethod = []MetaAlertMethodElem{
-			"visual",
-		}
-	}
-	if v, ok := raw["emergencyMethod"]; !ok || v == nil {
-		plain.EmergencyMethod = []MetaEmergencyMethodElem{
-			"visual",
-			"sound",
-		}
-	}
-	if v, ok := raw["warnMethod"]; !ok || v == nil {
-		plain.WarnMethod = []MetaWarnMethodElem{
-			"visual",
-		}
-	}
-	*j = Meta(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *Attr) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	type Plain Attr
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	if v, ok := raw["_group"]; !ok || v == nil {
-		plain.Group = "self"
-	}
-	if v, ok := raw["_mode"]; !ok || v == nil {
-		plain.Mode = 644.0
-	}
-	if v, ok := raw["_owner"]; !ok || v == nil {
-		plain.Owner = "self"
-	}
-	*j = Attr(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *DiscoveryJsonServer) UnmarshalJSON(b []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-	if v, ok := raw["id"]; !ok || v == nil {
-		return fmt.Errorf("field id in DiscoveryJsonServer: required")
-	}
-	if v, ok := raw["version"]; !ok || v == nil {
-		return fmt.Errorf("field version in DiscoveryJsonServer: required")
-	}
-	type Plain DiscoveryJsonServer
-	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
-		return err
-	}
-	*j = DiscoveryJsonServer(plain)
-	return nil
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *AlarmMethodEnum) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_AlarmMethodEnum {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_AlarmMethodEnum, v)
-	}
-	*j = AlarmMethodEnum(v)
-	return nil
+var enumValues_MetaDisplayScaleType = []interface{}{
+	"linear",
+	"logarithmic",
+	"squareroot",
+	"power",
 }

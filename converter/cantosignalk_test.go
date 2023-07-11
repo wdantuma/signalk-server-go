@@ -24,7 +24,7 @@ func TestParse(t *testing.T) {
 	sk := converter.Convert(source)
 	filter := filter.NewFilter(signalkserver.SELF)
 	f := filter.Filter(sk)
-	json := format.Json(f)
+	json := format.Json(f, nil)
 
 	for bytes := range json {
 		fmt.Println(string(bytes))

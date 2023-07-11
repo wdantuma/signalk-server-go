@@ -1,11 +1,15 @@
 package stream
 
+import (
+	"github.com/wdantuma/signalk-server-go/signalk"
+)
+
 type Hub struct {
 	// Registered clients.
 	clients map[*client]bool
 
 	// Inbound messages from the clients.
-	Broadcast chan []byte
+	BroadcastDelta chan signalk.DeltaJson
 
 	// Register requests from the clients.
 	register chan *client
@@ -16,10 +20,10 @@ type Hub struct {
 
 func NewHub() *Hub {
 	hub := &Hub{
-		Broadcast:  make(chan []byte),
-		register:   make(chan *client),
-		unregister: make(chan *client),
-		clients:    make(map[*client]bool),
+		BroadcastDelta: make(chan signalk.DeltaJson),
+		register:       make(chan *client),
+		unregister:     make(chan *client),
+		clients:        make(map[*client]bool),
 	}
 	hub.run()
 	return hub
@@ -34,14 +38,14 @@ func (h *Hub) run() {
 			case client := <-h.unregister:
 				if _, ok := h.clients[client]; ok {
 					delete(h.clients, client)
-					close(client.send)
+					close(client.sendDelta)
 				}
-			case message := <-h.Broadcast:
+			case message := <-h.BroadcastDelta:
 				for client := range h.clients {
 					select {
-					case client.send <- message:
+					case client.sendDelta <- message:
 					default:
-						close(client.send)
+						close(client.sendDelta)
 						delete(h.clients, client)
 					}
 				}

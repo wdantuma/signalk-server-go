@@ -109,7 +109,7 @@ func (pgn *PgnBase) Convert(frame socketcan.ExtendedFrame, canSource *socketcan.
 			if field.source != "" {
 				value, ok := fields[field.source]
 				if !ok {
-					log.Printf("Source  (%s) not found", field.source)
+					//log.Printf("Source  (%s) not found", field.source)
 					continue
 				}
 				val.Value = value
