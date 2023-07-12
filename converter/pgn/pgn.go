@@ -34,7 +34,6 @@ type PgnBase struct {
 	PgnInfo *canboat.PGNInfo
 	Canboat *canboat.Canboat
 	Fields  []field
-	//State   state.ServerState
 }
 
 type Pgn interface {
@@ -85,8 +84,13 @@ func (pgn *PgnBase) Convert(state state.ServerState, frame socketcan.ExtendedFra
 			} else {
 				value = float64(frame.UnsignedBitsLittleEndian(int(field.BitOffset), int(field.BitLength))) * float64(field.Resolution)
 			}
-			if value >= float64(field.RangeMin) && value <= float64(field.RangeMax) {
+			if state.GetDebug() {
+				// do not filter out of limit values
 				fields[field.Id] = value
+			} else {
+				if value >= float64(field.RangeMin) && value <= float64(field.RangeMax) {
+					fields[field.Id] = value
+				}
 			}
 			break
 		case "MMSI":

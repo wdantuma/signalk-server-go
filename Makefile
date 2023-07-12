@@ -16,6 +16,9 @@ build:
 run: build
 	./${BINARY_NAME} --mmsi 244810236
 
+debug: build
+	./${BINARY_NAME} --mmsi 244810236 --debug
+
 clean:
 	go clean
 	rm ${BINARY_NAME}

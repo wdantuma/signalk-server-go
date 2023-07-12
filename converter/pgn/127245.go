@@ -7,9 +7,6 @@ func NewPgn127245() *PgnBase {
 		field{
 			node:   "steering.rudderAngle",
 			source: "position",
-			filter: func(fields n2kFields) bool {
-				return !fields.Contains("position")
-			},
 		},
 	)
 

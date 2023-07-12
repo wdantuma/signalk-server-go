@@ -25,6 +25,8 @@ func NewCanToSignalk() (*canToSignalk, error) {
 	c.addPgn(pgn.NewPgn129038())
 	c.addPgn(pgn.NewPgn129039())
 	c.addPgn(pgn.NewPgn127245())
+	c.addPgn(pgn.NewPgn128267())
+	c.addPgn(pgn.NewPgn128259())
 
 	return &c, nil
 }
