@@ -65,7 +65,7 @@ func main() {
 		// setup static file server at /@signalk
 		fs := http.FileServer(http.Dir(*staticPath))
 		router.PathPrefix("/@signalk").Handler(fs)
-		router.Handle("/", http.RedirectHandler("/@signalk/feeboard-sk", http.StatusSeeOther))
+		router.Handle("/", http.RedirectHandler("/@signalk/freeboard-sk", http.StatusSeeOther))
 	}
 
 	// start listening
