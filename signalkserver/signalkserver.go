@@ -13,10 +13,11 @@ import (
 	"github.com/wdantuma/signalk-server-go/stream"
 )
 
+var Version = "0.0.1"
+
 const (
 	SERVER_NAME string = "signalk-server-go"
 	TIME_FORMAT string = "2006-01-02T15:04:05.000Z"
-	VERSION     string = "0.0.1"
 )
 
 type signalkServer struct {
@@ -28,7 +29,7 @@ type signalkServer struct {
 
 func NewSignalkServer() *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
-	return &signalkServer{name: SERVER_NAME, version: VERSION, self: self}
+	return &signalkServer{name: SERVER_NAME, version: Version, self: self}
 }
 
 func (s *signalkServer) GetName() string {

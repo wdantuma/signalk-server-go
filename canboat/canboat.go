@@ -7,6 +7,8 @@ import (
 	"log"
 )
 
+var Version = "5.0.1"
+
 type Canboat struct {
 	pgnDefinitions  *PGNDefinitions
 	pgnIndex        map[int]int

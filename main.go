@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	enableTls := flag.Bool("tls", false, "Enable tls")
 	tlsCertFile := flag.String("tlscert", "", "Tls certificate file")
 	tlsKeyFile := flag.String("tlskey", "", "Tls key file")
-	serverWebApps := flag.Bool("webapps", true, "Serve webapps")
+	serveWebApps := flag.Bool("webapps", true, "Serve webapps")
 	version := flag.Bool("version", false, "Show version")
 	port := flag.Int("port", listenPort, "Listen port")
 	debug := flag.Bool("debug", false, "Enable debugging")
@@ -52,19 +53,19 @@ func main() {
 
 	if *version {
 		fmt.Printf("%s version : %s\n", signalkServer.GetName(), signalkServer.GetVersion())
-		fmt.Printf("canboat version : 5.0.1\n")
+		fmt.Printf("canboat version : %s\n", canboat.Version)
 		fmt.Printf("signalk version : 2.0.0\n")
 		return
 	}
 
 	signalkServer.SetupServer(ctx, "", router)
 
-	if *serverWebApps {
+	if *serveWebApps {
 		fmt.Printf("Serving webapps from %s\n", *staticPath)
 		// setup static file server at /@signalk
 		fs := http.FileServer(http.Dir(*staticPath))
 		router.PathPrefix("/@signalk").Handler(fs)
-		router.Handle("/", http.RedirectHandler("/@signalk/instrumentpanel", http.StatusSeeOther))
+		router.Handle("/", http.RedirectHandler("/@signalk/feeboard-sk", http.StatusSeeOther))
 	}
 
 	// start listening
