@@ -76,7 +76,7 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource *socketcan.Can
 					}
 
 					delta, convertOk := pgnConverter.Convert(state, frame, canSource)
-					if convertOk {
+					if convertOk && delta.Context != nil {
 						output <- delta
 					}
 				} else {

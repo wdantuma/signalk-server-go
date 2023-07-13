@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/converter"
 	"github.com/wdantuma/signalk-server-go/socketcan"
+	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 )
 
@@ -17,7 +18,6 @@ var Version = "0.0.1"
 
 const (
 	SERVER_NAME string = "signalk-server-go"
-	TIME_FORMAT string = "2006-01-02T15:04:05.000Z"
 )
 
 type signalkServer struct {
@@ -25,6 +25,7 @@ type signalkServer struct {
 	version string
 	self    string
 	debug   bool
+	store   store.Store
 }
 
 func NewSignalkServer() *signalkServer {
@@ -97,20 +98,22 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	})
 
 	// main loop
-	source, err := socketcan.NewCanDumpSource("data/n2kdump.txt")
+	canSource, err := socketcan.NewCanDumpSource("data/n2kdump.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	converter, err := converter.NewCanToSignalk()
+	canToSignalkConverter, err := converter.NewCanToSignalk()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sk := converter.Convert(server, source)
+	converted := canToSignalkConverter.Convert(server, canSource)
+	valueStore := store.NewMemoryStore()
+	stored := valueStore.Store(converted)
 
 	go func() {
-		for bytes := range sk {
-			hub.BroadcastDelta <- bytes
+		for delta := range stored {
+			hub.BroadcastDelta <- delta
 		}
 	}()
 
