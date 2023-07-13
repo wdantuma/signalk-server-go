@@ -4,7 +4,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/signalk"
 )
 
-type Hub struct {
+type hub struct {
 	// Registered clients.
 	clients map[*client]bool
 
@@ -18,8 +18,8 @@ type Hub struct {
 	unregister chan *client
 }
 
-func NewHub() *Hub {
-	hub := &Hub{
+func NewHub() *hub {
+	hub := &hub{
 		BroadcastDelta: make(chan signalk.DeltaJson),
 		register:       make(chan *client),
 		unregister:     make(chan *client),
@@ -29,7 +29,7 @@ func NewHub() *Hub {
 	return hub
 }
 
-func (h *Hub) run() {
+func (h *hub) run() {
 	go func() {
 		for {
 			select {

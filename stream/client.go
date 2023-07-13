@@ -2,19 +2,12 @@ package stream
 
 import (
 	"bytes"
-	"encoding/json"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
-	"github.com/wdantuma/signalk-server-go/signalk/format"
-
-	//	"github.com/wdantuma/signalk-server-go/signalkserver"
-	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 )
 
 const (
@@ -31,14 +24,6 @@ const (
 	maxMessageSize = 1024
 )
 
-type streamHandler struct {
-	state state.ServerState
-}
-
-func NewStreamHandler(s state.ServerState) *streamHandler {
-	return &streamHandler{state: s}
-}
-
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
@@ -52,7 +37,7 @@ var upgrader = websocket.Upgrader{
 // Client is a middleman between the websocket connection and the hub.
 type client struct {
 	filter *filter.Filter
-	hub    *Hub
+	hub    *hub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -60,18 +45,6 @@ type client struct {
 	// Buffered channel of outbound messages.
 	send      chan []byte
 	sendDelta chan signalk.DeltaJson
-}
-
-func (s *streamHandler) helloMessage() []byte {
-	hello := signalk.HelloJson{}
-	hello.Name = ref.String(s.state.GetName())
-	hello.Version = (signalk.Version)(s.state.GetVersion())
-	hello.Timestamp = ref.UTCTimeStamp(time.Now())
-	hello.Self = ref.String(s.state.GetSelf())
-	hello.Roles = append(hello.Roles, "master")
-	hello.Roles = append(hello.Roles, "main")
-	helloBytes, _ := json.Marshal(hello)
-	return helloBytes
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -153,25 +126,4 @@ func (c *client) writePump() {
 			}
 		}
 	}
-}
-
-// serveWs handles websocket requests from the peer.
-func (s *streamHandler) ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	contextFilter := filter.NewFilter(s.state.GetSelf())
-	contextFilter.Subscribe = filter.ParseSubscribe(r.URL.Query().Get("subscribe"))
-	client := &client{hub: hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256), sendDelta: make(chan signalk.DeltaJson)}
-	client.hub.register <- client
-
-	client.send <- s.helloMessage()
-	format.Json(contextFilter.Filter(client.sendDelta), client.send)
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/socketcan"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
+	"github.com/wdantuma/signalk-server-go/vessel"
 )
 
 var Version = "0.0.1"
@@ -88,13 +89,14 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 		router = mux.NewRouter()
 	}
 
-	hub := stream.NewHub()
-
 	signalk := router.PathPrefix("/signalk").Subrouter()
 	signalk.HandleFunc("", server.Hello)
 	streamHandler := stream.NewStreamHandler(server)
-	signalk.HandleFunc("/v1/stream", func(w http.ResponseWriter, r *http.Request) {
-		streamHandler.ServeWs(hub, w, r)
+	vesselHandler := vessel.NewVesselHandler(server)
+	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
+	signalk.PathPrefix("/v1/api/vessel").Handler(vesselHandler)
+	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotImplemented)
 	})
 
 	// main loop
@@ -113,7 +115,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 
 	go func() {
 		for delta := range stored {
-			hub.BroadcastDelta <- delta
+			streamHandler.BroadcastDelta <- delta
 		}
 	}()
 
