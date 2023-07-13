@@ -1,5 +1,7 @@
 package state
 
+import "github.com/wdantuma/signalk-server-go/store"
+
 const (
 	SERVER_NAME string = "signalk-server-go"
 	TIME_FORMAT string = "2006-01-02T15:04:05.000Z"
@@ -13,4 +15,5 @@ type ServerState interface {
 	GetSelf() string
 	GetDebug() bool
 	SetMMSI(string)
+	GetStore() store.Store
 }

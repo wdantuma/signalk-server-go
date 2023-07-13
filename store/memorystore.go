@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/wdantuma/signalk-server-go/signalk"
@@ -17,8 +18,8 @@ func NewMemoryStore() *memoryStore {
 	return &memoryStore{values: make(map[string]*Value), keyIndex: make([]string, 0)}
 }
 
-func (s *memoryStore) Put(key string, timestamp int64, source *signalk.Source, value interface{}) {
-	storeValue := &Value{value: value, source: source, lastChange: timestamp}
+func (s *memoryStore) Put(key string, timestamp int64, vessel string, path string, source *signalk.Source, value interface{}) {
+	storeValue := &Value{Vessel: vessel, Path: path, Value: value, Source: source, LastChange: timestamp}
 	_, valueExists := s.values[key]
 	s.values[key] = storeValue
 	if !valueExists {
@@ -37,6 +38,19 @@ func (s *memoryStore) Get(key string) (*Value, bool) {
 	return v, ok
 }
 
+func (s *memoryStore) GetList(key string) []*Value {
+	values := make([]*Value, 0)
+	startIndex := sort.SearchStrings(s.keyIndex, key)
+	for i := startIndex; i < len(s.keyIndex); i++ {
+		if strings.Index(s.keyIndex[i], key) == 0 {
+			k := s.keyIndex[i]
+			v := s.values[k]
+			values = append(values, v)
+		}
+	}
+	return values
+}
+
 func (s *memoryStore) Store(input <-chan signalk.DeltaJson) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	go func() {
@@ -48,7 +62,7 @@ func (s *memoryStore) Store(input <-chan signalk.DeltaJson) <-chan signalk.Delta
 					if err != nil {
 						timeStamp = time.Now()
 					}
-					s.Put(key, timeStamp.Unix(), update.Source, value.Value)
+					s.Put(key, timeStamp.Unix(), *delta.Context, value.Path, update.Source, value.Value)
 				}
 			}
 			output <- delta

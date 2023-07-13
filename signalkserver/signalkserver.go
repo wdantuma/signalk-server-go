@@ -54,6 +54,10 @@ func (s *signalkServer) EnableDebug() {
 	s.debug = true
 }
 
+func (s *signalkServer) GetStore() store.Store {
+	return s.store
+}
+
 func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
@@ -94,7 +98,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	streamHandler := stream.NewStreamHandler(server)
 	vesselHandler := vessel.NewVesselHandler(server)
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
-	signalk.PathPrefix("/v1/api/vessel").Handler(vesselHandler)
+	signalk.PathPrefix("/v1/api/vessels").Handler(vesselHandler)
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
@@ -111,6 +115,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 
 	converted := canToSignalkConverter.Convert(server, canSource)
 	valueStore := store.NewMemoryStore()
+	server.store = valueStore
 	stored := valueStore.Store(converted)
 
 	go func() {

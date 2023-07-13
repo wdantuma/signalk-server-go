@@ -5,12 +5,15 @@ import (
 )
 
 type Value struct {
-	value      interface{}
-	source     *signalk.Source
-	lastChange int64
+	Vessel     string
+	Path       string
+	Value      interface{}
+	Source     *signalk.Source
+	LastChange int64
 }
 
 type Store interface {
-	Put(key string, timestamp int64, source *signalk.Source, value interface{})
+	Put(key string, timestamp int64, vessel string, path string, source *signalk.Source, value interface{})
 	Get(key string) (*Value, bool)
+	GetList(key string) []*Value
 }
