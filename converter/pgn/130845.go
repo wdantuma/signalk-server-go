@@ -4,6 +4,18 @@ import (
 	"fmt"
 )
 
+var modeMapping = map[string]string{
+	"Day":   "day",
+	"Night": "night",
+}
+
+var colorMapping = map[string]string{
+	"Red":   "red",
+	"Green": "green",
+	"Blue":  "blue",
+	"White": "white",
+}
+
 func NewPgn130845() *PgnBase {
 	pgn := NewPgnBase(130845)
 
@@ -22,7 +34,7 @@ func NewPgn130845() *PgnBase {
 						displayMode[k] = v
 					}
 				}
-				displayMode["mode"] = fields["value"]
+				displayMode["mode"] = modeMapping[StringValue(fields["value"])]
 				return displayMode
 			},
 		},
@@ -58,7 +70,7 @@ func NewPgn130845() *PgnBase {
 						displayMode[k] = v
 					}
 				}
-				displayMode["color"] = fields["value"]
+				displayMode["color"] = colorMapping[StringValue(fields["value"])]
 				return displayMode
 			},
 		},
