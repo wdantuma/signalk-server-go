@@ -13,26 +13,28 @@ import (
 type canToSignalk struct {
 	canboat *canboat.Canboat
 	pgn     map[uint]*pgn.PgnBase
+	state   state.ServerState
 }
 
-func NewCanToSignalk() (*canToSignalk, error) {
+func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
 	canboat, err := canboat.NewCanboat()
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := canToSignalk{canboat: canboat, pgn: make(map[uint]*pgn.PgnBase)}
+	c := canToSignalk{canboat: canboat, state: state, pgn: make(map[uint]*pgn.PgnBase)}
 	c.addPgn(pgn.NewPgn130306())
 	c.addPgn(pgn.NewPgn129038())
 	c.addPgn(pgn.NewPgn129039())
 	c.addPgn(pgn.NewPgn127245())
 	c.addPgn(pgn.NewPgn128267())
 	c.addPgn(pgn.NewPgn128259())
+	c.addPgn(pgn.NewPgn130845())
 
 	return &c, nil
 }
 
 func (c *canToSignalk) addPgn(b *pgn.PgnBase) {
-	if b.Init(c.canboat) {
+	if b.Init(c.canboat, c.state) {
 		c.pgn[b.Pgn] = b
 	}
 }

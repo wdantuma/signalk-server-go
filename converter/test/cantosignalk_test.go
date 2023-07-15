@@ -18,7 +18,7 @@ func TestParse(t *testing.T) {
 		log.Fatal(err)
 	}
 	state := signalkserver.NewSignalkServer()
-	converter, err := converter.NewCanToSignalk()
+	converter, err := converter.NewCanToSignalk(state)
 	if err != nil {
 		log.Fatal(err)
 	}

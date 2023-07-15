@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}",
-            "args": ["--mmsi","244810236"]
+            "args": ["--mmsi","244810236","--debug",""]
         }
     ]
 }

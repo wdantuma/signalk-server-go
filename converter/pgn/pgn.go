@@ -34,6 +34,7 @@ type PgnBase struct {
 	PgnInfo *canboat.PGNInfo
 	Canboat *canboat.Canboat
 	Fields  []field
+	State   state.ServerState
 }
 
 type Pgn interface {
@@ -64,18 +65,52 @@ func (base *PgnBase) GetDelta(state state.ServerState, frame socketcan.ExtendedF
 func (pgn *PgnBase) Convert(state state.ServerState, frame socketcan.ExtendedFrame, canSource *socketcan.CanSource) (signalk.DeltaJson, bool) {
 	delta := pgn.GetDelta(state, frame, canSource)
 
+	lookupFieldTypeField := canboat.Field{}
+
 	fields := make(n2kFields)
 
-	for _, field := range pgn.PgnInfo.Fields.Field {
+	for _, f := range pgn.PgnInfo.Fields.Field {
+
+		field := f // copy
+
+		if field.BitOffset == 0 && field.BitLength == 0 {
+			field.BitOffset = lookupFieldTypeField.BitOffset
+			field.BitLength = lookupFieldTypeField.BitLength
+			field.FieldType = lookupFieldTypeField.FieldType
+			field.Unit = lookupFieldTypeField.Unit
+			field.Signed = lookupFieldTypeField.Signed
+			field.Resolution = lookupFieldTypeField.Resolution
+			field.RangeMax = lookupFieldTypeField.RangeMax
+			field.RangeMin = lookupFieldTypeField.RangeMin
+			field.LookupEnumeration = lookupFieldTypeField.LookupEnumeration
+			field.LookupBitEnumeration = lookupFieldTypeField.LookupBitEnumeration
+		} else {
+			lookupFieldTypeField.BitOffset = field.BitOffset + field.BitLength
+		}
 
 		switch field.FieldType {
 		case "LOOKUP":
 			value := float64(frame.UnsignedBitsLittleEndian(int(field.BitOffset), int(field.BitLength))) * float64(field.Resolution)
 			if value >= float64(field.RangeMin) && value <= float64(field.RangeMax) {
-				refValue, ok := pgn.GetEnumValueName(Float64Value(value), field.LookupEnumeration)
+				refValue, ok := pgn.Canboat.GetLookupEnumeration(field.LookupEnumeration, Float64Value(value))
 				if ok {
 					fields[field.Id] = refValue
 				}
+
+				fieldType, ok := pgn.Canboat.GetLookupFieldTypeEnumeration(field.LookupFieldTypeEnumeration, Float64Value(value))
+				if ok {
+					fields[field.Id] = fieldType.Name
+					lookupFieldTypeField.FieldType = fieldType.FieldType
+					lookupFieldTypeField.Signed = fieldType.Signed
+					lookupFieldTypeField.Unit = fieldType.Unit
+					lookupFieldTypeField.Resolution = field.Resolution
+					lookupFieldTypeField.BitLength = fieldType.Bits
+					lookupFieldTypeField.RangeMax = 255 // TODO Fix this
+					if fieldType.FieldType == "LOOKUP" {
+						lookupFieldTypeField.LookupEnumeration = fieldType.LookupEnumeration
+					}
+				}
+
 			}
 		case "NUMBER":
 			var value float64
@@ -137,28 +172,15 @@ func (pgn *PgnBase) Convert(state state.ServerState, frame socketcan.ExtendedFra
 	return delta, include
 }
 
-func (base *PgnBase) Init(canboat *canboat.Canboat) bool {
+func (base *PgnBase) Init(canboat *canboat.Canboat, state state.ServerState) bool {
 	base.Canboat = canboat
+	base.State = state
 	pgnInfo, ok := canboat.GetPGNInfo(base.Pgn)
 	if !ok {
 		return false
 	}
 	base.PgnInfo = pgnInfo
 	return true
-}
-
-func (base *PgnBase) GetEnumValueName(value float64, name string) (string, bool) {
-
-	lookupEnumeration, ok := base.Canboat.GetLookupEnumeration(name)
-	if ok {
-		for _, v := range lookupEnumeration.EnumPair {
-			if v.ValueAttr == uint(value) {
-				return v.Name, true
-			}
-		}
-	}
-
-	return "", false
 }
 
 func Float64Value(value interface{}) float64 {
@@ -176,6 +198,15 @@ func StringValue(value interface{}) string {
 		return v
 	default:
 		return ""
+	}
+}
+
+func MapValue(value interface{}) map[string]interface{} {
+	switch v := value.(type) {
+	case map[string]interface{}:
+		return v
+	default:
+		return nil
 	}
 }
 

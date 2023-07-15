@@ -108,7 +108,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	if err != nil {
 		log.Fatal(err)
 	}
-	canToSignalkConverter, err := converter.NewCanToSignalk()
+	canToSignalkConverter, err := converter.NewCanToSignalk(server)
 	if err != nil {
 		log.Fatal(err)
 	}
