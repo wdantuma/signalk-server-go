@@ -26,6 +26,7 @@ func getDisplayModeObject(state state.ServerState) map[string]interface{} {
 			displayMode[k] = v
 		}
 	}
+	return displayMode
 }
 
 func NewPgn130845() *PgnBase {
