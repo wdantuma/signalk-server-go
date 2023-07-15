@@ -2,6 +2,8 @@ package pgn
 
 import (
 	"fmt"
+
+	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 )
 
 var modeMapping = map[string]string{
@@ -16,6 +18,16 @@ var colorMapping = map[string]string{
 	"White": "white",
 }
 
+func getDisplayModeObject(state state.ServerState) map[string]interface{} {
+	displayMode := make(map[string]interface{})
+	value, ok := state.GetStore().Get(fmt.Sprintf("%s/environment.displaymode", state.GetSelf()))
+	if ok {
+		for k, v := range MapValue(value.Value) {
+			displayMode[k] = v
+		}
+	}
+}
+
 func NewPgn130845() *PgnBase {
 	pgn := NewPgnBase(130845)
 
@@ -26,14 +38,7 @@ func NewPgn130845() *PgnBase {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Night mode"
 			},
 			value: func(fields n2kFields) interface{} {
-				self := pgn.State.GetSelf()
-				displayMode := make(map[string]interface{})
-				value, ok := pgn.State.GetStore().Get(fmt.Sprintf("%s/environment.displaymode", self))
-				if ok {
-					for k, v := range MapValue(value.Value) {
-						displayMode[k] = v
-					}
-				}
+				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["mode"] = modeMapping[StringValue(fields["value"])]
 				return displayMode
 			},
@@ -44,14 +49,7 @@ func NewPgn130845() *PgnBase {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Backlight level"
 			},
 			value: func(fields n2kFields) interface{} {
-				self := pgn.State.GetSelf()
-				displayMode := make(map[string]interface{})
-				value, ok := pgn.State.GetStore().Get(fmt.Sprintf("%s/environment.displaymode", self))
-				if ok {
-					for k, v := range MapValue(value.Value) {
-						displayMode[k] = v
-					}
-				}
+				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["backlight"] = fields["value"]
 				return displayMode
 			},
@@ -62,14 +60,7 @@ func NewPgn130845() *PgnBase {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Night mode color"
 			},
 			value: func(fields n2kFields) interface{} {
-				self := pgn.State.GetSelf()
-				displayMode := make(map[string]interface{})
-				value, ok := pgn.State.GetStore().Get(fmt.Sprintf("%s/environment.displaymode", self))
-				if ok {
-					for k, v := range MapValue(value.Value) {
-						displayMode[k] = v
-					}
-				}
+				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["color"] = colorMapping[StringValue(fields["value"])]
 				return displayMode
 			},
@@ -80,14 +71,7 @@ func NewPgn130845() *PgnBase {
 		// 		return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Time hour display"
 		// 	},
 		// 	value: func(fields n2kFields) interface{} {
-		// 		self := pgn.State.GetSelf()
-		// 		displayMode := make(map[string]interface{})
-		// 		value, ok := pgn.State.GetStore().Get(fmt.Sprintf("%s/environment.displaymode", self))
-		// 		if ok {
-		// 			for k, v := range MapValue(value.Value) {
-		// 				displayMode[k] = v
-		// 			}
-		// 		}
+		// 		displayMode := getDisplayModeObject(pgn.State)
 		// 		displayMode["timehour"] = fields["value"]
 		// 		return displayMode
 		// 	},
