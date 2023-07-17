@@ -9,11 +9,11 @@ import (
 	"github.com/wdantuma/signalk-server-go/signalk/filter"
 	"github.com/wdantuma/signalk-server-go/signalk/format"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
-	"github.com/wdantuma/signalk-server-go/socketcan"
+	"github.com/wdantuma/signalk-server-go/source/candumpsource"
 )
 
 func TestParse(t *testing.T) {
-	source, err := socketcan.NewCanDumpSource("../../data/n2kdump.txt")
+	source, err := candumpsource.NewCanDumpSource("../../data/n2kdump.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

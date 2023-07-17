@@ -7,7 +7,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/converter/pgn"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
-	"github.com/wdantuma/signalk-server-go/socketcan"
+	"github.com/wdantuma/signalk-server-go/source"
 )
 
 type canToSignalk struct {
@@ -39,7 +39,7 @@ func (c *canToSignalk) addPgn(b *pgn.PgnBase) {
 	}
 }
 
-func (c *canToSignalk) GetPgnConverter(frame socketcan.ExtendedFrame) (*pgn.PgnBase, bool) {
+func (c *canToSignalk) GetPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase, bool) {
 	pgn := frame.ID & 0x03FFFF00 >> 8
 	pgnConverter, ok := c.pgn[uint(pgn)]
 	if ok {
@@ -48,7 +48,7 @@ func (c *canToSignalk) GetPgnConverter(frame socketcan.ExtendedFrame) (*pgn.PgnB
 	return nil, false
 }
 
-func Reassemble(frame socketcan.ExtendedFrame, length int, input <-chan socketcan.ExtendedFrame) socketcan.ExtendedFrame {
+func Reassemble(frame source.ExtendedFrame, length int, input <-chan source.ExtendedFrame) source.ExtendedFrame {
 	newBytes := make([]byte, 0)
 	newBytes = append(newBytes, frame.Data[2:]...)
 	for len(newBytes) < length {
@@ -60,11 +60,11 @@ func Reassemble(frame socketcan.ExtendedFrame, length int, input <-chan socketca
 	return frame
 }
 
-func (c *canToSignalk) Convert(state state.ServerState, canSource *socketcan.CanSource) <-chan signalk.DeltaJson {
+func (c *canToSignalk) Convert(state state.ServerState, canSource source.CanSource) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	go func() {
 		for {
-			frame, ok := <-canSource.Source
+			frame, ok := <-canSource.Source()
 			if ok {
 				pgnConverter, ok := c.GetPgnConverter(frame)
 				if ok {
@@ -73,7 +73,7 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource *socketcan.Can
 						//frameNr := frame.UnsignedBitsLittleEndian(4, 4)
 						if seqNr == 0 {
 							len := int(frame.UnsignedBitsLittleEndian(8, 8))
-							frame = Reassemble(frame, len, canSource.Source)
+							frame = Reassemble(frame, len, canSource.Source())
 						}
 					}
 

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/converter"
-	"github.com/wdantuma/signalk-server-go/socketcan"
+	"github.com/wdantuma/signalk-server-go/source/candumpsource"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 	"github.com/wdantuma/signalk-server-go/vessel"
@@ -104,7 +104,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	})
 
 	// main loop
-	canSource, err := socketcan.NewCanDumpSource("data/n2kdump.txt")
+	canSource, err := candumpsource.NewCanDumpSource("data/n2kdump.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
