@@ -7,15 +7,16 @@ import (
 	"time"
 
 	"github.com/wdantuma/signalk-server-go/source"
+	"go.einride.tech/can"
 )
 
 type canDumpSource struct {
-	source chan source.ExtendedFrame
+	source chan can.Frame
 	file   *os.File
 	label  string
 }
 
-func (cd *canDumpSource) Source() chan source.ExtendedFrame {
+func (cd *canDumpSource) Source() chan can.Frame {
 	return cd.source
 }
 
@@ -31,7 +32,7 @@ func NewCanDumpSource(file string) (*canDumpSource, error) {
 		return nil, err
 	}
 	canSource.label = path.Base(file)
-	canSource.source = make(chan source.ExtendedFrame)
+	canSource.source = make(chan can.Frame)
 	go func() {
 		for {
 			fileScanner := bufio.NewScanner(canSource.file)
@@ -41,7 +42,7 @@ func NewCanDumpSource(file string) (*canDumpSource, error) {
 				if err != nil {
 					return
 				}
-				canSource.source <- *source.NewExtendedFrame(&f)
+				canSource.source <- f
 				time.Sleep(10 * time.Millisecond)
 			}
 			canSource.file.Seek(0, 0)

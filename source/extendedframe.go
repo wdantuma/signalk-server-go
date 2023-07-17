@@ -9,10 +9,10 @@ type ExtendedFrame struct {
 	Data []byte
 }
 
-func NewExtendedFrame(frame *can.Frame) *ExtendedFrame {
+func NewExtendedFrame(frame *can.Frame) ExtendedFrame {
 	newFrame := ExtendedFrame{ID: frame.ID, Data: make([]byte, 0)}
 	newFrame.Data = append(newFrame.Data, frame.Data[0:]...)
-	return &newFrame
+	return newFrame
 }
 
 func packLittleEndian(bytes []byte, startByte int) uint64 {

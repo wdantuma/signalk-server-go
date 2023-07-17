@@ -3,18 +3,18 @@ package socketcan
 import (
 	"log"
 
-	"github.com/wdantuma/signalk-server-go/source"
+	"go.einride.tech/can"
 	"go.einride.tech/can/pkg/candevice"
 	"go.einride.tech/can/pkg/socketcan"
 )
 
 type canSource struct {
-	source chan source.ExtendedFrame
+	source chan can.Frame
 	device *candevice.Device
 	label  string
 }
 
-func (cd *canSource) Source() chan source.ExtendedFrame {
+func (cd *canSource) Source() chan can.Frame {
 	return cd.source
 }
 
@@ -57,7 +57,7 @@ func NewCanSource(canDevice string) (*canSource, error) {
 		return nil, err
 	}
 	canSource.label = canDevice
-	canSource.source = make(chan source.ExtendedFrame)
+	canSource.source = make(chan can.Frame)
 	conn, err := socketcan.Dial("can", "can0")
 	if err != nil {
 		log.Fatal(err)
@@ -66,7 +66,7 @@ func NewCanSource(canDevice string) (*canSource, error) {
 		recv := socketcan.NewReceiver(conn)
 		for recv.Receive() {
 			frame := recv.Frame()
-			canSource.source <- *source.NewExtendedFrame(&frame)
+			canSource.source <- frame
 		}
 	}()
 

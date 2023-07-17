@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
+	"github.com/wdantuma/signalk-server-go/source/candumpsource"
 )
 
 func main() {
@@ -56,6 +57,13 @@ func main() {
 		fmt.Printf("canboat version : %s\n", canboat.Version)
 		fmt.Printf("signalk version : 2.0.0\n")
 		return
+	}
+
+	canSource, err := candumpsource.NewCanDumpSource("data/n2kdump.txt")
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		signalkServer.AddSource(canSource)
 	}
 
 	signalkServer.SetupServer(ctx, "", router)

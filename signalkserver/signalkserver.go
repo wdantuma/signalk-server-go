@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/converter"
-	"github.com/wdantuma/signalk-server-go/source/candumpsource"
+	"github.com/wdantuma/signalk-server-go/source"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 	"github.com/wdantuma/signalk-server-go/vessel"
@@ -22,16 +22,17 @@ const (
 )
 
 type signalkServer struct {
-	name    string
-	version string
-	self    string
-	debug   bool
-	store   store.Store
+	name      string
+	version   string
+	self      string
+	debug     bool
+	store     store.Store
+	sourcehub *source.Sourcehub
 }
 
 func NewSignalkServer() *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
-	return &signalkServer{name: SERVER_NAME, version: Version, self: self}
+	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: source.NewSourceHub()}
 }
 
 func (s *signalkServer) GetName() string {
@@ -88,6 +89,10 @@ func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
 `, method, req.Host, wsmethod, req.Host, server.GetVersion())
 }
 
+func (server *signalkServer) AddSource(source source.CanSource) {
+	server.sourcehub.AddSource(source)
+}
+
 func (server *signalkServer) SetupServer(ctx context.Context, hostname string, router *mux.Router) *mux.Router {
 	if router == nil {
 		router = mux.NewRouter()
@@ -103,16 +108,12 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 		w.WriteHeader(http.StatusNotImplemented)
 	})
 
-	// main loop
-	canSource, err := candumpsource.NewCanDumpSource("data/n2kdump.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
 	canToSignalkConverter, err := converter.NewCanToSignalk(server)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	canSource := server.sourcehub.Start()
 	converted := canToSignalkConverter.Convert(server, canSource)
 	valueStore := store.NewMemoryStore()
 	server.store = valueStore
