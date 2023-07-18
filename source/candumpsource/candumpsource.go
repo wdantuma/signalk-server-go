@@ -6,7 +6,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/wdantuma/signalk-server-go/source"
 	"go.einride.tech/can"
 )
 
@@ -38,7 +37,7 @@ func NewCanDumpSource(file string) (*canDumpSource, error) {
 			fileScanner := bufio.NewScanner(canSource.file)
 			fileScanner.Split(bufio.ScanLines)
 			for fileScanner.Scan() {
-				f, err := source.Parse(fileScanner.Text())
+				f, err := Parse(fileScanner.Text())
 				if err != nil {
 					return
 				}
