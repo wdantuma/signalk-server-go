@@ -14,10 +14,10 @@ build:
 	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" main.go
 
 run: build
-	./${BINARY_NAME} --mmsi 244810236
+	./${BINARY_NAME} --mmsi 244810236 --file-source  data/n2kdump.txt
 
 debug: build
-	./${BINARY_NAME} --mmsi 244810236 --debug
+	./${BINARY_NAME} --mmsi 244810236 --debug  --file-source  data/n2kdump.txt
 
 clean:
 	go clean

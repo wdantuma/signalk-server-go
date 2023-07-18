@@ -17,6 +17,14 @@ func (sh *Sourcehub) AddSource(source CanSource) {
 	sh.startInternal()
 }
 
+func (sh *Sourcehub) Sources() []string {
+	sources := make([]string, 0)
+	for _, s := range sh.inputs {
+		sources = append(sources, s.Label())
+	}
+	return sources
+}
+
 func NewSourceHub() *Sourcehub {
 	sourceHub := &Sourcehub{}
 	sourceHub.output = make(chan SourceFrame)

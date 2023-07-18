@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}",
-            "args": ["--mmsi","244810236","--debug",""]
+            "args": ["--mmsi","244810236","--debug","--file-source","data/n2kdump.txt","--file-source","data/n2kdump 2.txt" ]
         }
     ]
 }

@@ -7,12 +7,25 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/source/candumpsource"
+	"github.com/wdantuma/signalk-server-go/source/cansource"
 )
+
+type arrayFlag []string
+
+func (s *arrayFlag) String() string {
+	return strings.Join(*s, ",")
+}
+
+func (s *arrayFlag) Set(value string) error {
+	*s = append(*s, value)
+	return nil
+}
 
 func main() {
 
@@ -28,8 +41,13 @@ func main() {
 	version := flag.Bool("version", false, "Show version")
 	port := flag.Int("port", listenPort, "Listen port")
 	debug := flag.Bool("debug", false, "Enable debugging")
-	staticPath := flag.String("webapppath", "./static", "Path to webapps")
+	staticPath := flag.String("webapp-path", "./static", "Path to webapps")
 	mmsi := flag.String("mmsi", "", "Vessel MMSI")
+	var fileSources arrayFlag
+	flag.Var(&fileSources, "file-source", "Path to candump file")
+	var sources arrayFlag
+	flag.Var(&sources, "source", "Source Can device")
+
 	flag.Parse()
 
 	listenPort = *port
@@ -59,11 +77,26 @@ func main() {
 		return
 	}
 
-	canSource, err := candumpsource.NewCanDumpSource("data/n2kdump.txt")
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		signalkServer.AddSource(canSource)
+	if len(fileSources) > 0 {
+		for _, fs := range fileSources {
+			canSource, err := candumpsource.NewCanDumpSource(fs)
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				signalkServer.AddSource(canSource)
+			}
+		}
+	}
+
+	if len(sources) > 0 {
+		for _, s := range sources {
+			canSource, err := cansource.NewCanSource(s)
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				signalkServer.AddSource(canSource)
+			}
+		}
 	}
 
 	signalkServer.SetupServer(ctx, "", router)

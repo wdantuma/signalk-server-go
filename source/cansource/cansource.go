@@ -1,4 +1,4 @@
-package socketcan
+package cansource
 
 import (
 	"log"
