@@ -12,7 +12,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	// 	source, err := candumpsource.NewCanDumpSource("../../data/n2kdump.txt")
+	// 	source, err := candumpsource.NewCanDumpSource("../../samples/n2kdump.txt")
 	// 	if err != nil {
 	// 		log.Fatal(err)
 	// 	}
