@@ -58,8 +58,8 @@ func (c *client) readPump() {
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	//c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	//c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -87,9 +87,9 @@ func (c *client) readPump() {
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
 func (c *client) writePump() {
-	ticker := time.NewTicker(pingPeriod)
+	//ticker := time.NewTicker(pingPeriod)
 	defer func() {
-		ticker.Stop()
+		//ticker.Stop()
 		c.conn.Close()
 	}()
 
@@ -119,11 +119,11 @@ func (c *client) writePump() {
 			if err := w.Close(); err != nil {
 				return
 			}
-		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
-			}
+			// case <-ticker.C:
+			// 	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			// 	if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			// 		return
+			// 	}
 		}
 	}
 }
