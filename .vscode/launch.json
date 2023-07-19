@@ -2,6 +2,7 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //"244810236" 230035780
     "version": "0.2.0",
     "configurations": [
         {
@@ -10,7 +11,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}",
-            "args": ["--mmsi","244810236","--debug","--file-source","samples/n2kdump.txt"]
+            "args": ["--mmsi","230035780","--debug","--file-source","samples/aava-n2k.data" ]
         }
     ]
 }

@@ -48,20 +48,21 @@ func (c *canToSignalk) GetPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase
 	return nil, false
 }
 
-func Reassemble(frame source.ExtendedFrame, length int, input <-chan source.SourceFrame) source.ExtendedFrame {
-	newBytes := make([]byte, 0)
-	newBytes = append(newBytes, frame.Data[2:]...)
-	for len(newBytes) < length {
-		f := <-input
-		newBytes = append(newBytes, f.Frame.Data[1:]...)
-	}
-	frame.Data = newBytes
+// func Reassemble(frame source.ExtendedFrame, length int, input <-chan source.SourceFrame) source.ExtendedFrame {
+// 	newBytes := make([]byte, 0)
+// 	newBytes = append(newBytes, frame.Data[2:]...)
+// 	for len(newBytes) < length {
+// 		f := <-input
+// 		newBytes = append(newBytes, f.Frame.Data[1:]...)
+// 	}
+// 	frame.Data = newBytes
 
-	return frame
-}
+// 	return frame
+// }
 
 func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.SourceFrame) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
+	fastframes := make(map[string]*source.ExtendedFrame)
 	go func() {
 		for {
 			sourceFrame, ok := <-canSource
@@ -73,8 +74,14 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.
 						seqNr := frame.UnsignedBitsLittleEndian(0, 4)
 						//frameNr := frame.UnsignedBitsLittleEndian(4, 4)
 						if seqNr == 0 {
-							len := int(frame.UnsignedBitsLittleEndian(8, 8))
-							frame = Reassemble(frame, len, canSource)
+							fastframes[sourceFrame.Label] = frame.First()
+						} else {
+							if fastframes[sourceFrame.Label].Next(frame) {
+								frame = *fastframes[sourceFrame.Label]
+								delete(fastframes, sourceFrame.Label)
+							} else {
+								continue
+							}
 						}
 					}
 

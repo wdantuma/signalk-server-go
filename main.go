@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
-	"github.com/wdantuma/signalk-server-go/source/candumpsource"
 	"github.com/wdantuma/signalk-server-go/source/cansource"
+	"github.com/wdantuma/signalk-server-go/source/filesource"
 )
 
 type arrayFlag []string
@@ -25,6 +25,15 @@ func (s *arrayFlag) String() string {
 func (s *arrayFlag) Set(value string) error {
 	*s = append(*s, value)
 	return nil
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Do stuff here
+		log.Println(r.RequestURI)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	})
 }
 
 func main() {
@@ -62,9 +71,11 @@ func main() {
 	}
 
 	router := mux.NewRouter()
+	router.Use((loggingMiddleware))
 	signalkServer := signalkserver.NewSignalkServer()
 	if *debug {
 		signalkServer.EnableDebug()
+		router.Use(loggingMiddleware)
 	}
 	if *mmsi != "" {
 		signalkServer.SetMMSI(*mmsi)
@@ -79,7 +90,7 @@ func main() {
 
 	if len(fileSources) > 0 {
 		for _, fs := range fileSources {
-			canSource, err := candumpsource.NewCanDumpSource(fs)
+			canSource, err := filesource.CreateFileSource(fs)
 			if err != nil {
 				log.Fatal(err)
 			} else {

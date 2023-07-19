@@ -6,11 +6,12 @@ import (
 
 type ExtendedFrame struct {
 	ID   uint32
+	Len  int
 	Data []byte
 }
 
 func NewExtendedFrame(frame *can.Frame) ExtendedFrame {
-	newFrame := ExtendedFrame{ID: frame.ID, Data: make([]byte, 0)}
+	newFrame := ExtendedFrame{ID: frame.ID, Data: make([]byte, 0), Len: 8}
 	newFrame.Data = append(newFrame.Data, frame.Data[0:]...)
 	return newFrame
 }
@@ -85,4 +86,19 @@ func (frame *ExtendedFrame) UnsignedBitsLittleEndian(start int, length int) uint
 func (frame *ExtendedFrame) SignedBitsLittleEndian(start, length int) int64 {
 	unsigned := frame.UnsignedBitsLittleEndian(start, length)
 	return asSigned(unsigned, length)
+}
+
+func (frame *ExtendedFrame) First() *ExtendedFrame {
+	frame.Len = int(frame.UnsignedBitsLittleEndian(8, 8))
+	frame.Data = frame.Data[2:]
+	return frame
+}
+
+func (frame *ExtendedFrame) Next(nextframe ExtendedFrame) bool {
+	frame.Data = append(frame.Data, nextframe.Data[1:]...)
+	if len(frame.Data) >= frame.Len {
+		return true
+	}
+
+	return false
 }
