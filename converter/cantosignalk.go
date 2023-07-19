@@ -29,6 +29,7 @@ func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
 	c.addPgn(pgn.NewPgn128267())
 	c.addPgn(pgn.NewPgn128259())
 	c.addPgn(pgn.NewPgn130845())
+	c.addPgn(pgn.NewPgn65359())
 
 	return &c, nil
 }
