@@ -18,8 +18,8 @@ func NewMemoryStore() *memoryStore {
 	return &memoryStore{values: make(map[string]*Value), keyIndex: make([]string, 0)}
 }
 
-func (s *memoryStore) Put(key string, timestamp int64, vessel string, path string, source *signalk.Source, value interface{}) {
-	storeValue := &Value{Vessel: vessel, Path: path, Value: value, Source: source, LastChange: timestamp}
+func (s *memoryStore) Put(key string, timestamp time.Time, vessel string, path string, source *signalk.Source, value interface{}) {
+	storeValue := &Value{Vessel: vessel, Path: path, Value: value, Source: source, LastChange: timestamp.UnixMicro(), Meta: make(map[string]interface{})}
 	_, valueExists := s.values[key]
 	s.values[key] = storeValue
 	if !valueExists {
@@ -62,7 +62,7 @@ func (s *memoryStore) Store(input <-chan signalk.DeltaJson) <-chan signalk.Delta
 					if err != nil {
 						timeStamp = time.Now()
 					}
-					s.Put(key, timeStamp.Unix(), *delta.Context, value.Path, update.Source, value.Value)
+					s.Put(key, timeStamp, *delta.Context, value.Path, update.Source, value.Value)
 				}
 			}
 			output <- delta

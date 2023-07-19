@@ -52,10 +52,12 @@ func (base *PgnBase) GetDelta(state state.ServerState, frame source.ExtendedFram
 	delta.Context = ref.String(state.GetSelf())
 	update := signalk.DeltaJsonUpdatesElem{}
 	update.Timestamp = ref.UTCTimeStamp(time.Now()) // TODO get from source
-	update.Source = &signalk.Source{Pgn: ref.Float64(float64(base.Pgn)),
+	update.Source = &signalk.Source{
+		Pgn:   ref.Float64(float64(base.Pgn)),
 		Src:   ref.String(strconv.FormatUint(uint64(src), 10)),
 		Type:  "NMEA2000",
-		Label: source}
+		Label: source,
+	}
 
 	//update.Values = pgnConverter.Convert(update.Values)
 	delta.Updates = append(delta.Updates, update)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
@@ -33,7 +34,14 @@ func GetResultObject(r map[string]interface{}, parts []string, v *store.Value) m
 		r = make(map[string]interface{})
 	}
 	if len(parts) == 1 {
-		r[parts[0]] = v.Value
+		vm := make(map[string]interface{})
+		vm["value"] = v.Value
+		vm["$source"] = v.Source.Label
+		vm["pgn"] = v.Source.Pgn
+		vm["timestamp"] = time.UnixMicro(v.LastChange).Format(state.TIME_FORMAT)
+		meta := make(map[string]interface{})
+		vm["meta"] = meta
+		r[parts[0]] = vm
 	} else {
 		r2 := MapValue(r[parts[0]])
 		if r2 == nil {
@@ -67,10 +75,13 @@ func (s *vesselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if metaRequest {
+
 		result := make(map[string]interface{})
-
 		resultBytes, _ := json.Marshal(result)
-
+		v, ok := s.state.GetStore().Get(key)
+		if ok {
+			resultBytes, _ = json.Marshal(v.Meta)
+		}
 		w.Write(resultBytes)
 	} else {
 		values := s.state.GetStore().GetList(key)
