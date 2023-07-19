@@ -75,6 +75,7 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.
 						//frameNr := frame.UnsignedBitsLittleEndian(4, 4)
 						if seqNr == 0 {
 							fastframes[sourceFrame.Label] = frame.First()
+							continue
 						} else {
 							if fastframes[sourceFrame.Label].Next(frame) {
 								frame = *fastframes[sourceFrame.Label]

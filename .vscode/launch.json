@@ -11,7 +11,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}",
-            "args": ["--mmsi","230035780","--debug","--file-source","samples/aava-n2k.data" ]
+            "args": ["--mmsi","230035780","--file-source","samples/aava-n2k.data" ]
         }
     ]
 }

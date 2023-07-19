@@ -89,6 +89,20 @@ func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
 `, method, req.Host, wsmethod, req.Host, server.GetVersion())
 }
 
+func (server *signalkServer) LoginStatus(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `
+	{
+		"status": "notLoggedIn",
+		"readOnlyAccess": true,
+		"authenticationRequired": true,
+		"allowNewUserRegistration": true,
+		"allowDeviceAccessRequests": true,
+		"securityWasEnabled": false
+	}
+`)
+}
+
 func (server *signalkServer) AddSource(source source.CanSource) {
 	server.sourcehub.AddSource(source)
 }
@@ -107,6 +121,8 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
+
+	router.HandleFunc("/skServer/loginStatus", server.LoginStatus)
 
 	canToSignalkConverter, err := converter.NewCanToSignalk(server)
 	if err != nil {

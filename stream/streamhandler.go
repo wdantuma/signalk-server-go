@@ -45,11 +45,12 @@ func (s *streamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	contextFilter := filter.NewFilter(s.state.GetSelf())
 	contextFilter.Subscribe = filter.ParseSubscribe(r.URL.Query().Get("subscribe"))
-	client := &client{hub: s.hub, filter: contextFilter, conn: conn, send: make(chan []byte, 256), sendDelta: make(chan signalk.DeltaJson)}
+	client := &client{hub: s.hub, filter: contextFilter, conn: conn, send: make(chan []byte, 1024), sendDelta: make(chan signalk.DeltaJson, 10)}
+	format.Json(contextFilter.Filter(client.sendDelta), client.send)
+	time.Sleep(1 * time.Second)
 	client.hub.register <- client
 
 	client.send <- s.helloMessage()
-	format.Json(contextFilter.Filter(client.sendDelta), client.send)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
