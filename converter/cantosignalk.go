@@ -16,6 +16,10 @@ type canToSignalk struct {
 	state   state.ServerState
 }
 
+type CanToSignalk interface {
+	Convert(state.ServerState, <-chan source.SourceFrame) <-chan signalk.DeltaJson
+}
+
 func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
 	canboat, err := canboat.NewCanboat()
 	if err != nil {
@@ -40,7 +44,7 @@ func (c *canToSignalk) addPgn(b *pgn.PgnBase) {
 	}
 }
 
-func (c *canToSignalk) GetPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase, bool) {
+func (c *canToSignalk) getPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase, bool) {
 	pgn := frame.ID & 0x03FFFF00 >> 8
 	pgnConverter, ok := c.pgn[uint(pgn)]
 	if ok {
@@ -48,18 +52,6 @@ func (c *canToSignalk) GetPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase
 	}
 	return nil, false
 }
-
-// func Reassemble(frame source.ExtendedFrame, length int, input <-chan source.SourceFrame) source.ExtendedFrame {
-// 	newBytes := make([]byte, 0)
-// 	newBytes = append(newBytes, frame.Data[2:]...)
-// 	for len(newBytes) < length {
-// 		f := <-input
-// 		newBytes = append(newBytes, f.Frame.Data[1:]...)
-// 	}
-// 	frame.Data = newBytes
-
-// 	return frame
-// }
 
 func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.SourceFrame) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
@@ -69,7 +61,7 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.
 			sourceFrame, ok := <-canSource
 			if ok {
 				frame := source.NewExtendedFrame(&sourceFrame.Frame)
-				pgnConverter, ok := c.GetPgnConverter(frame)
+				pgnConverter, ok := c.getPgnConverter(frame)
 				if ok {
 					if pgnConverter.PgnInfo.Type == "Fast" {
 						seqNr := frame.UnsignedBitsLittleEndian(0, 4)

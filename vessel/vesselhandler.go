@@ -89,6 +89,7 @@ func (s *vesselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if len(values) > 0 {
 			result := signalk.SignalkJson{Vessels: make(signalk.SignalkJsonVessels)}
 			result.Self = s.state.GetSelf()
+			result.Version = "1.0.0"
 			var resultVessel map[string]interface{}
 			lastVessel := ""
 			for _, v := range values {

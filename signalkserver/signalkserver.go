@@ -15,7 +15,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/vessel"
 )
 
-var Version = "0.0.1"
+var Version = "0.0.1" // overwritten with VERSION DEF during build
 
 const (
 	SERVER_NAME string = "signalk-server-go"
@@ -28,6 +28,7 @@ type signalkServer struct {
 	debug     bool
 	store     store.Store
 	sourcehub *source.Sourcehub
+	converter converter.CanToSignalk
 }
 
 func NewSignalkServer() *signalkServer {
@@ -51,19 +52,27 @@ func (s *signalkServer) GetDebug() bool {
 	return s.debug
 }
 
-func (s *signalkServer) EnableDebug() {
-	s.debug = true
+func (s *signalkServer) SetDebug(debug bool) {
+	s.debug = debug
 }
 
 func (s *signalkServer) GetStore() store.Store {
 	return s.store
 }
 
+func (s *signalkServer) GetConverter() converter.CanToSignalk {
+	return s.converter
+}
+
 func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
 
-func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
+func (server *signalkServer) AddSource(source source.CanSource) {
+	server.sourcehub.AddSource(source)
+}
+
+func (server *signalkServer) hello(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	method := "http"
 	wsmethod := "ws"
@@ -89,7 +98,7 @@ func (server *signalkServer) Hello(w http.ResponseWriter, req *http.Request) {
 `, method, req.Host, wsmethod, req.Host, server.GetVersion())
 }
 
-func (server *signalkServer) LoginStatus(w http.ResponseWriter, req *http.Request) {
+func (server *signalkServer) loginStatus(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `
 	{
@@ -103,17 +112,14 @@ func (server *signalkServer) LoginStatus(w http.ResponseWriter, req *http.Reques
 `)
 }
 
-func (server *signalkServer) AddSource(source source.CanSource) {
-	server.sourcehub.AddSource(source)
-}
-
 func (server *signalkServer) SetupServer(ctx context.Context, hostname string, router *mux.Router) *mux.Router {
+	var err error
 	if router == nil {
 		router = mux.NewRouter()
 	}
 
 	signalk := router.PathPrefix("/signalk").Subrouter()
-	signalk.HandleFunc("", server.Hello)
+	signalk.HandleFunc("", server.hello)
 	streamHandler := stream.NewStreamHandler(server)
 	vesselHandler := vessel.NewVesselHandler(server)
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
@@ -122,15 +128,15 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 		w.WriteHeader(http.StatusNotImplemented)
 	})
 
-	router.HandleFunc("/skServer/loginStatus", server.LoginStatus)
+	router.HandleFunc("/skServer/loginStatus", server.loginStatus)
 
-	canToSignalkConverter, err := converter.NewCanToSignalk(server)
+	server.converter, err = converter.NewCanToSignalk(server)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	canSource := server.sourcehub.Start()
-	converted := canToSignalkConverter.Convert(server, canSource)
+	converted := server.converter.Convert(server, canSource)
 	valueStore := store.NewMemoryStore()
 	server.store = valueStore
 	stored := valueStore.Store(converted)

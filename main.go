@@ -74,7 +74,7 @@ func main() {
 	router.Use((loggingMiddleware))
 	signalkServer := signalkserver.NewSignalkServer()
 	if *debug {
-		signalkServer.EnableDebug()
+		signalkServer.SetDebug(true)
 		router.Use(loggingMiddleware)
 	}
 	if *mmsi != "" {
