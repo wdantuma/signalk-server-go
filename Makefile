@@ -11,10 +11,10 @@ webapps:
 	mkdir -p static/${INSTRUMENTPANEL_PACKAGE} && wget -cq https://registry.npmjs.org/${INSTRUMENTPANEL_PACKAGE}/-/instrumentpanel-${INSTRUMENTPANEL_VERSION}.tgz -O -|tar -xz -C static/${INSTRUMENTPANEL_PACKAGE} package/public --strip-components 2	
 	
 build:
-	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
+	GOARCH=amd64 GOOS=linux go build -o build/${BINARY_NAME} -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
 buildarm:
-	GOARCH=arm GOOS=linux go build -o ${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
+	GOARCH=arm GOOS=linux go build -o build/${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
 run: build
 	./${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
