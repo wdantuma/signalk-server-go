@@ -46,10 +46,10 @@ func NewPgnBase(pgn uint) *PgnBase {
 
 }
 
-func (base *PgnBase) GetDelta(state state.ServerState, frame source.ExtendedFrame, source string) signalk.DeltaJson {
+func (base *PgnBase) getDelta(frame source.ExtendedFrame, source string) signalk.DeltaJson {
 	src := frame.ID & 0xFF
 	delta := signalk.DeltaJson{}
-	delta.Context = ref.String(state.GetSelf())
+	delta.Context = ref.String(base.State.GetSelf())
 	update := signalk.DeltaJsonUpdatesElem{}
 	update.Timestamp = ref.UTCTimeStamp(time.Now()) // TODO get from source
 	update.Source = &signalk.Source{
@@ -64,16 +64,23 @@ func (base *PgnBase) GetDelta(state state.ServerState, frame source.ExtendedFram
 	return delta
 }
 
-func (pgn *PgnBase) Convert(state state.ServerState, frame source.ExtendedFrame, source string) (signalk.DeltaJson, bool) {
-	delta := pgn.GetDelta(state, frame, source)
+func (pgn *PgnBase) Convert(frame source.ExtendedFrame, source string) (signalk.DeltaJson, bool) {
+	delta := pgn.getDelta(frame, source)
 
 	lookupFieldTypeField := canboat.Field{}
 
 	fields := make(n2kFields)
+	metadata := make(map[string]signalk.Meta)
 
 	for _, f := range pgn.PgnInfo.Fields.Field {
 
 		field := f // copy
+
+		meta := signalk.Meta{}
+		unit := f.Unit
+		meta.Units = &unit
+		meta.Description = f.Description
+		metadata[f.Id] = meta
 
 		if field.BitOffset == 0 && field.BitLength == 0 {
 			field.BitOffset = lookupFieldTypeField.BitOffset
@@ -121,7 +128,7 @@ func (pgn *PgnBase) Convert(state state.ServerState, frame source.ExtendedFrame,
 			} else {
 				value = float64(frame.UnsignedBitsLittleEndian(int(field.BitOffset), int(field.BitLength))) * float64(field.Resolution)
 			}
-			if state.GetDebug() {
+			if pgn.State.GetDebug() {
 				// do not filter out of limit values
 				fields[field.Id] = value
 			} else {
@@ -144,15 +151,20 @@ func (pgn *PgnBase) Convert(state state.ServerState, frame source.ExtendedFrame,
 	for _, field := range pgn.Fields {
 
 		val := signalk.DeltaJsonUpdatesElemValuesElem{}
+		meta := signalk.DeltaJsonUpdatesElemMetaElem{}
 		if field.context != nil {
 			delta.Context = field.context(fields)
 		} else {
 			val.Path = field.node
+			meta.Path = field.node
 			if field.source != "" {
 				value, ok := fields[field.source]
 				if !ok {
-					//log.Printf("Source  (%s) not found", field.source)
 					continue
+				}
+				m, ok := metadata[field.source]
+				if ok {
+					meta.Value = m
 				}
 				val.Value = value
 			} else if field.value != nil {
@@ -161,11 +173,9 @@ func (pgn *PgnBase) Convert(state state.ServerState, frame source.ExtendedFrame,
 				log.Println("No value function")
 				continue
 			}
-			if field.filter != nil && field.filter(fields) {
+			if (field.filter != nil && field.filter(fields)) || field.filter == nil {
 				include = true
-				delta.Updates[len(delta.Updates)-1].Values = append(delta.Updates[len(delta.Updates)-1].Values, val)
-			} else if field.filter == nil {
-				include = true
+				delta.Updates[len(delta.Updates)-1].Meta = append(delta.Updates[len(delta.Updates)-1].Meta, meta)
 				delta.Updates[len(delta.Updates)-1].Values = append(delta.Updates[len(delta.Updates)-1].Values, val)
 			}
 		}

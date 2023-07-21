@@ -32,6 +32,7 @@ func MapValue(value interface{}) map[string]interface{} {
 func GetResultObject(r map[string]interface{}, parts []string, v *store.Value) map[string]interface{} {
 	if r == nil {
 		r = make(map[string]interface{})
+		r["uuid"] = v.Vessel
 	}
 	if len(parts) == 1 {
 		vm := make(map[string]interface{})
@@ -39,8 +40,7 @@ func GetResultObject(r map[string]interface{}, parts []string, v *store.Value) m
 		vm["$source"] = v.Source.Label
 		vm["pgn"] = v.Source.Pgn
 		vm["timestamp"] = time.UnixMicro(v.LastChange).Format(state.TIME_FORMAT)
-		meta := make(map[string]interface{})
-		vm["meta"] = meta
+		vm["meta"] = v.Meta
 		r[parts[0]] = vm
 	} else {
 		r2 := MapValue(r[parts[0]])
@@ -56,6 +56,7 @@ func (s *vesselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	metaRequest := false
 	key := ""
+	var self bool
 	parts := strings.Split(r.RequestURI, "/")[5:]
 	if len(parts) > 0 && parts[0] != "" {
 		if r.RequestURI[len(r.RequestURI)-1:] == "/" {
@@ -64,6 +65,7 @@ func (s *vesselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		vessel := parts[0]
 		parts = parts[1:]
 		if vessel == "self" {
+			self = true
 			vessel = s.state.GetSelf()
 		}
 		if len(parts) > 1 && parts[len(parts)-1] == "meta" {
@@ -105,7 +107,18 @@ func (s *vesselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			result.Vessels[lastVessel] = resultVessel
 
-			resultBytes, _ := json.Marshal(result)
+			var resultBytes []byte
+			if self {
+				if len(result.Vessels) == 1 {
+
+					resultBytes, _ = json.Marshal(result.Vessels[s.state.GetSelf()])
+				} else {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+			} else {
+				resultBytes, _ = json.Marshal(result)
+			}
 
 			w.Write(resultBytes)
 		} else {

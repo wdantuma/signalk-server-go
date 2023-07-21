@@ -11,12 +11,12 @@ type Value struct {
 	Path       string
 	Value      interface{}
 	Source     *signalk.Source
-	Meta       map[string]interface{}
+	Meta       *signalk.Meta
 	LastChange int64
 }
 
 type Store interface {
-	Put(key string, timestamp time.Time, vessel string, path string, source *signalk.Source, value interface{})
+	Put(key string, timestamp time.Time, vessel string, path string, source *signalk.Source, meta *signalk.Meta, value interface{})
 	Get(key string) (*Value, bool)
 	GetList(key string) []*Value
 }

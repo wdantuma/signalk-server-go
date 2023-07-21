@@ -60,10 +60,6 @@ func (s *signalkServer) GetStore() store.Store {
 	return s.store
 }
 
-func (s *signalkServer) GetConverter() converter.CanToSignalk {
-	return s.converter
-}
-
 func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
@@ -136,7 +132,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	}
 
 	canSource := server.sourcehub.Start()
-	converted := server.converter.Convert(server, canSource)
+	converted := server.converter.Convert(canSource)
 	valueStore := store.NewMemoryStore()
 	server.store = valueStore
 	stored := valueStore.Store(converted)

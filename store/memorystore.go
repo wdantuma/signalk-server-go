@@ -18,8 +18,8 @@ func NewMemoryStore() *memoryStore {
 	return &memoryStore{values: make(map[string]*Value), keyIndex: make([]string, 0)}
 }
 
-func (s *memoryStore) Put(key string, timestamp time.Time, vessel string, path string, source *signalk.Source, value interface{}) {
-	storeValue := &Value{Vessel: vessel, Path: path, Value: value, Source: source, LastChange: timestamp.UnixMicro(), Meta: make(map[string]interface{})}
+func (s *memoryStore) Put(key string, timestamp time.Time, vessel string, path string, source *signalk.Source, meta *signalk.Meta, value interface{}) {
+	storeValue := &Value{Vessel: vessel, Path: path, Value: value, Source: source, LastChange: timestamp.UnixMicro(), Meta: meta}
 	_, valueExists := s.values[key]
 	s.values[key] = storeValue
 	if !valueExists {
@@ -55,14 +55,28 @@ func (s *memoryStore) Store(input <-chan signalk.DeltaJson) <-chan signalk.Delta
 	output := make(chan signalk.DeltaJson)
 	go func() {
 		for delta := range input {
-			for _, update := range delta.Updates {
+			for i := range delta.Updates {
+				update := &delta.Updates[i]
 				for _, value := range update.Values {
 					key := fmt.Sprintf("%s/%s", *delta.Context, value.Path)
 					timeStamp, err := time.Parse(signalk.TIME_FORMAT, string(*update.Timestamp))
 					if err != nil {
 						timeStamp = time.Now()
 					}
-					s.Put(key, timeStamp, *delta.Context, value.Path, update.Source, value.Value)
+					meta := &signalk.Meta{}
+					old, ok := s.Get(key)
+					if ok {
+						if old.Meta.Description == "" {
+							for _, m := range update.Meta {
+								if m.Path == value.Path {
+									meta = &m.Value
+									break
+								}
+							}
+						}
+					}
+					update.Meta = nil
+					s.Put(key, timeStamp, *delta.Context, value.Path, update.Source, meta, value.Value)
 				}
 			}
 			output <- delta

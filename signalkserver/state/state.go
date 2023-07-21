@@ -1,6 +1,8 @@
 package state
 
-import "github.com/wdantuma/signalk-server-go/store"
+import (
+	"github.com/wdantuma/signalk-server-go/store"
+)
 
 const (
 	SERVER_NAME string = "signalk-server-go"

@@ -17,7 +17,7 @@ type canToSignalk struct {
 }
 
 type CanToSignalk interface {
-	Convert(state.ServerState, <-chan source.SourceFrame) <-chan signalk.DeltaJson
+	Convert(<-chan source.SourceFrame) <-chan signalk.DeltaJson
 }
 
 func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
@@ -53,7 +53,7 @@ func (c *canToSignalk) getPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase
 	return nil, false
 }
 
-func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.SourceFrame) <-chan signalk.DeltaJson {
+func (c *canToSignalk) Convert(canSource <-chan source.SourceFrame) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
 	fastframes := make(map[string]*source.ExtendedFrame)
 	go func() {
@@ -79,13 +79,13 @@ func (c *canToSignalk) Convert(state state.ServerState, canSource <-chan source.
 						}
 					}
 
-					delta, convertOk := pgnConverter.Convert(state, frame, sourceFrame.Label)
+					delta, convertOk := pgnConverter.Convert(frame, sourceFrame.Label)
 					if convertOk && delta.Context != nil {
 						output <- delta
 					}
 				} else {
 					pgn := frame.ID & 0x03FFFF00 >> 8
-					if state.GetDebug() {
+					if c.state.GetDebug() {
 						log.Printf("PGN:%d\n", pgn)
 					}
 				}
