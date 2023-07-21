@@ -17,10 +17,10 @@ buildarm:
 	GOARCH=arm GOOS=linux go build -o build/${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
 run: build
-	./${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
+	./build/${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
 
 debug: build
-	./${BINARY_NAME} --mmsi 244810236 --debug  --file-source  samples/nemo-n2k.txt
+	./build/${BINARY_NAME} --mmsi 244810236 --debug  --file-source  samples/nemo-n2k.txt
 
 clean:
 	go clean

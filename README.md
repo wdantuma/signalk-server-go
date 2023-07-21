@@ -28,7 +28,7 @@ For a ARMv6 target
 
 Run the server
 ```
-$ ./signalk-server-go --file-source samples/nemo-n2k.txt
+$ ./build/signalk-server-go --file-source samples/nemo-n2k.txt
 ```
 
 Point a browser at [http://localhost:3000/](https://localhost:3000/)
@@ -39,11 +39,11 @@ Point a browser at [http://localhost:3000/](https://localhost:3000/)
 For live data with a can device with socketcan support
 
 ```
-./signalk-server-go --source can0
+./build//signalk-server-go --source can0
 ```
 
 If you have an AIS connected to the N2K network
 
 ```
-./signalk-server-go --mmsi <mmsi number> --source can0
+./build/signalk-server-go --mmsi <mmsi number> --source can0
 ```
