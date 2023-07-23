@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
+	"github.com/wdantuma/signalk-server-go/s57"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/source/cansource"
 	"github.com/wdantuma/signalk-server-go/source/filesource"
@@ -72,7 +73,7 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.Use((loggingMiddleware))
+	//router.Use((loggingMiddleware))
 	router.Use(handlers.CORS(
 		handlers.AllowCredentials(),
 		handlers.AllowedHeaders([]string{"authorization", "content-type", "dpop"}),
@@ -127,6 +128,11 @@ func main() {
 		router.PathPrefix("/@signalk").Handler(fs)
 		router.Handle("/", http.RedirectHandler("/@signalk/freeboard-sk", http.StatusSeeOther))
 	}
+
+	// charts
+
+	s57MvtTileHandler := s57.NewS57MvtTileHandler()
+	router.PathPrefix("/charts/{x}/{y}/{z}").Handler(s57MvtTileHandler)
 
 	// start listening
 	fmt.Printf("Listening on :%d...\n", listenPort)

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/converter"
+	"github.com/wdantuma/signalk-server-go/resources/charts"
 	"github.com/wdantuma/signalk-server-go/source"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
@@ -118,8 +119,11 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	signalk.HandleFunc("", server.hello)
 	streamHandler := stream.NewStreamHandler(server)
 	vesselHandler := vessel.NewVesselHandler(server)
+	chartsHandler := charts.NewChartsHandler()
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
 	signalk.PathPrefix("/v1/api/vessels").Handler(vesselHandler)
+	signalk.PathPrefix("/v1/api/resources/charts").Handler(chartsHandler)
+
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
