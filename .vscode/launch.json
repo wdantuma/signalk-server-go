@@ -10,8 +10,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceRoot}",
-            "args": ["--mmsi","244810236","--debug","--file-source","samples/nemo-n2k-20230719.txt" ]
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--mmsi","244810236","--webapp-path","../../static","--debug","--file-source","../../samples/nemo-n2k-20230719.txt" ]
         }
     ]
 }
