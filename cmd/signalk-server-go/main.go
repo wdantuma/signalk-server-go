@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
@@ -72,6 +73,13 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use((loggingMiddleware))
+	router.Use(handlers.CORS(
+		handlers.AllowCredentials(),
+		handlers.AllowedHeaders([]string{"authorization", "content-type", "dpop"}),
+		handlers.AllowedOriginValidator(func(_ string) bool {
+			return true
+		}),
+	))
 	signalkServer := signalkserver.NewSignalkServer()
 	if *debug {
 		signalkServer.SetDebug(true)
