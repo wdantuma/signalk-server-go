@@ -38,6 +38,7 @@ func (s *streamHandler) helloMessage() []byte {
 
 // serveWs handles websocket requests from the peer.
 func (s *streamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
