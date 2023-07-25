@@ -19,7 +19,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/s57-tiler",
-            //"args": ["--mmsi","244810236","--webapp-path","../../static","--debug","--file-source","../../samples/nemo-n2k-20230719.txt" ]
+            "args": ["--in","../../charts","--out","../../static/charts" ]
         }
     ]
 }
