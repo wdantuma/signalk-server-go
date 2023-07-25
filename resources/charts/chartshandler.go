@@ -20,7 +20,9 @@ func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c1["name"] = "S-57 test"
 	c1["format"] = "pbf"
 	c1["type"] = "S-57"
-	c1["url"] = "http://localhost:3000/charts/{x}/{y}/{z}"
+	c1["minZoom"] = 14
+	c1["maxZoom"] = 14
+	c1["url"] = "http://localhost:3000/charts/test/{x}/{y}/{z}"
 
 	charts := make(map[string]interface{})
 

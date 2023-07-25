@@ -21,6 +21,7 @@
 go.work
 static/@signalk/freeboard-sk
 static/@signalk/instrumentpanel
+static/charts
 /build
 /charts
 

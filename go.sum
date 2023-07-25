@@ -29,6 +29,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=
 github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
+github.com/tburke/iso8211 v0.0.0-20190905204635-916caaad4cc1 h1:xFRyaCFED0QxyK81wVEIYUI9YxOYZApFwKeHwNeNOiE=
+github.com/tburke/iso8211 v0.0.0-20190905204635-916caaad4cc1/go.mod h1:lMggrfJDoGgWMR6eA/YNok29py4uBnKzOP5BtX47mKk=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 go.einride.tech/can v0.5.5 h1:n/KlduZlzgTQ4lKvvgCFQAiNgvvrcX2F84+mTq0ExmA=
 go.einride.tech/can v0.5.5/go.mod h1:kYU4wj1bHATg3q8t6wOojsD8c5oPBjgiybtycE0phgw=

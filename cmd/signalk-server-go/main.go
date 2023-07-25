@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
-	"github.com/wdantuma/signalk-server-go/s57"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/source/cansource"
 	"github.com/wdantuma/signalk-server-go/source/filesource"
@@ -129,10 +128,9 @@ func main() {
 		router.Handle("/", http.RedirectHandler("/@signalk/freeboard-sk", http.StatusSeeOther))
 	}
 
-	// charts
-
-	s57MvtTileHandler := s57.NewS57MvtTileHandler()
-	router.PathPrefix("/charts/{x}/{y}/{z}").Handler(s57MvtTileHandler)
+	//charts
+	fs := http.FileServer(http.Dir("../../static"))
+	router.PathPrefix("/charts").Handler(fs)
 
 	// start listening
 	fmt.Printf("Listening on :%d...\n", listenPort)
