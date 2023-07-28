@@ -16,8 +16,9 @@ func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	c1 := make(map[string]interface{})
-	c1["identifier"] = "c1"
+	c1["identifier"] = "test"
 	c1["name"] = "S-57 test"
+	c1["description"] = "20230721_U7Inland_Waddenzee_week 29_NL"
 	c1["format"] = "pbf"
 	c1["type"] = "S-57"
 	c1["minZoom"] = 14
