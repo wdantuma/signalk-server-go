@@ -13,6 +13,9 @@ webapps:
 build:
 	GOARCH=amd64 GOOS=linux go build -o build/${BINARY_NAME} -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
+builds57tiler:
+	GOARCH=amd64 GOOS=linux go build -o build/s57-tiler  ./cmd/s57-tiler	
+
 buildarm:
 	GOARCH=arm GOOS=linux go build -o build/${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 

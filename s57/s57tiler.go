@@ -277,7 +277,7 @@ func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.
 
 	// for test now only buoys
 
-	layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "LNDARE", "BUAARE", "RECTRC", "NAVLNE", "DEPARE"}
+	layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "LNDARE", "BUAARE", "RECTRC", "NAVLNE", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE"}
 	//layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "RECTRC"}
 
 	for _, layerName := range layers {
