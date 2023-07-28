@@ -83,7 +83,7 @@ Usage of build/signalk-server-go:
 
 ### s57-tiler
 
-S57-tiler creates vectortiles from S57 ENC's wich can be used with freeboard-sk with s57 support
+S57-tiler creates vectortiles from S57 ENC's wich can be used with freeboard-sk with s57 support see [https://github.com/wdantuma/freeboard-sk/tree/feat-S57-support](https://github.com/wdantuma/freeboard-sk/tree/feat-S57-support)
 
 ```
 make builds57tiler
