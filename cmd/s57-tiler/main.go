@@ -96,6 +96,7 @@ func main() {
 			fmt.Printf("\rZoom: %d, Processed: %.0f %%    ", z, done)
 			n++
 		}
+		tiler.GenerateMetaData(*outputPath, datasets[0])
 	}
 
 }

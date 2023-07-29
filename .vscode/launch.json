@@ -11,7 +11,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/signalk-server-go",
-            "args": ["--mmsi","244810236","--webapp-path","../../static","--file-source","../../samples/nemo-n2k-20230719.txt" ]
+            "args": ["--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/nemo-n2k-20230719.txt" ]
         },
         {
             "name": "Launch s57-tiler",

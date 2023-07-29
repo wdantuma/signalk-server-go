@@ -4,14 +4,17 @@ package s57
 // see MVT spec at https://github.com/mapbox/vector-tile-spec/tree/master/2.1
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lukeroth/gdal"
+	"github.com/wdantuma/signalk-server-go/resources/charts"
 	"github.com/wdantuma/signalk-server-go/s57/dataset"
 	m "github.com/wdantuma/signalk-server-go/s57/mercantile"
 	"github.com/wdantuma/signalk-server-go/s57/vectortile"
@@ -272,12 +275,26 @@ func (s *s57Tiler) GetTiles(dataset dataset.Dataset, zoomLevel int) map[string]m
 	return tiles
 }
 
+func (s *s57Tiler) GenerateMetaData(outPath string, dataset dataset.Dataset) {
+	path := filepath.Join(outPath, dataset.Id, "sk-chart-meta.json")
+	metaData := charts.ChartMetaData{Id: dataset.Id, Name: dataset.Id, Created: time.Now().UTC(), ChartType: "S-57", ChartFormat: "pbf"}
+
+	out, _ := json.Marshal(metaData)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(path), 0700) // Create your file
+	}
+	err := os.WriteFile(path, out, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.TileID) {
 	mvtTile := vectortile.Tile{}
 
 	// for test now only buoys
 
-	layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "LNDARE", "BUAARE", "RECTRC", "NAVLNE", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE"}
+	layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE", "LNDARE", "BUAARE", "NAVLNE", "RECTRC"}
 	//layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "RECTRC"}
 
 	for _, layerName := range layers {

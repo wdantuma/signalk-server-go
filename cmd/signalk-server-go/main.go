@@ -52,6 +52,7 @@ func main() {
 	port := flag.Int("port", listenPort, "Listen port")
 	debug := flag.Bool("debug", false, "Enable debugging")
 	staticPath := flag.String("webapp-path", "./static", "Path to webapps")
+	chartsPath := flag.String("charts-path", "./static", "Path to the charts")
 	mmsi := flag.String("mmsi", "", "Vessel MMSI")
 	var fileSources arrayFlag
 	flag.Var(&fileSources, "file-source", "Path to candump file")
@@ -80,7 +81,7 @@ func main() {
 			return true
 		}),
 	))
-	signalkServer := signalkserver.NewSignalkServer()
+	signalkServer := signalkserver.NewSignalkServer(*chartsPath)
 	if *debug {
 		signalkServer.SetDebug(true)
 		router.Use(loggingMiddleware)
@@ -128,9 +129,11 @@ func main() {
 		router.Handle("/", http.RedirectHandler("/@signalk/freeboard-sk", http.StatusSeeOther))
 	}
 
-	//charts
-	fs := http.FileServer(http.Dir("../../static"))
-	router.PathPrefix("/charts").Handler(fs)
+	if *chartsPath != "" {
+		fmt.Printf("Serving charts from %s\n", *chartsPath)
+		fs := http.FileServer(http.Dir(*chartsPath))
+		router.PathPrefix("/charts").Handler(fs)
+	}
 
 	// start listening
 	fmt.Printf("Listening on :%d...\n", listenPort)

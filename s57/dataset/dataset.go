@@ -16,8 +16,9 @@ type File struct {
 }
 
 type Dataset struct {
-	Id    string
-	Files []File
+	Id          string
+	Description string
+	Files       []File
 }
 
 func GetS57Datasets(path string) ([]Dataset, error) {
@@ -29,7 +30,7 @@ func GetS57Datasets(path string) ([]Dataset, error) {
 				return err
 			}
 			if strings.ToUpper(info.Name()) == "CATALOG.031" {
-				dataset := Dataset{Id: "test"}
+				dataset := Dataset{Id: "test", Description: ""}
 				f, err := os.Open(fp)
 				if err != nil {
 					return err

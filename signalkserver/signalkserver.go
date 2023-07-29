@@ -23,18 +23,19 @@ const (
 )
 
 type signalkServer struct {
-	name      string
-	version   string
-	self      string
-	debug     bool
-	store     store.Store
-	sourcehub *source.Sourcehub
-	converter converter.CanToSignalk
+	name       string
+	version    string
+	self       string
+	debug      bool
+	store      store.Store
+	sourcehub  *source.Sourcehub
+	converter  converter.CanToSignalk
+	chartsPath string
 }
 
-func NewSignalkServer() *signalkServer {
+func NewSignalkServer(chartsPath string) *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
-	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: source.NewSourceHub()}
+	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: source.NewSourceHub(), chartsPath: chartsPath}
 }
 
 func (s *signalkServer) GetName() string {
@@ -119,7 +120,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	signalk.HandleFunc("", server.hello)
 	streamHandler := stream.NewStreamHandler(server)
 	vesselHandler := vessel.NewVesselHandler(server)
-	chartsHandler := charts.NewChartsHandler()
+	chartsHandler := charts.NewChartsHandler(server.chartsPath)
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
 	signalk.PathPrefix("/v1/api/vessels").Handler(vesselHandler)
 	signalk.PathPrefix("/v1/api/resources/charts").Handler(chartsHandler)

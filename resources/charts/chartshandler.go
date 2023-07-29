@@ -3,33 +3,70 @@ package charts
 import (
 	"encoding/json"
 	"net/http"
+
+	"fmt"
+	"io/fs"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type chartsHandler struct {
+	chartsPath string
 }
 
-func NewChartsHandler() *chartsHandler {
-	return &chartsHandler{}
+func NewChartsHandler(chartsPath string) *chartsHandler {
+	return &chartsHandler{chartsPath: chartsPath}
 }
 
 func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	c1 := make(map[string]interface{})
-	c1["identifier"] = "test"
-	c1["name"] = "S-57 test"
-	c1["description"] = "20230721_U7Inland_Waddenzee_week 29_NL"
-	c1["format"] = "pbf"
-	c1["type"] = "S-57"
-	c1["minZoom"] = 14
-	c1["maxZoom"] = 14
-	c1["url"] = "http://localhost:3000/charts/test/{x}/{y}/{z}"
-
 	charts := make(map[string]interface{})
+	path := filepath.Join(s.chartsPath, "charts")
+	filepath.WalkDir(path, func(fp string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry != nil {
+			info, err := entry.Info()
+			if err != nil {
+				return nil
+			}
+			name := info.Name()
+			if strings.ToUpper(name) == "SK-CHART-META.JSON" {
+				jsonFile, err := os.Open(fp)
+				if err == nil {
+					metaData := ChartMetaData{}
+					bytes, err := ioutil.ReadAll(jsonFile)
+					if err != nil {
+						log.Print(err)
+					}
+					err = json.Unmarshal(bytes, &metaData)
+					if err == nil {
+						chart := make(map[string]interface{})
+						chart["identifier"] = metaData.Id
+						chart["name"] = metaData.Name
+						chart["description"] = metaData.Description
+						chart["format"] = metaData.ChartFormat
+						chart["type"] = metaData.ChartType
+						chart["minzoom"] = 14
+						chart["maxzoom"] = 14
+						chart["url"] = fmt.Sprintf("/charts/%s/{x}/{y}/{z}", metaData.Id)
+						charts[metaData.Id] = chart
+					} else {
+						log.Print(err)
+					}
+				}
+			}
+		} else {
+			log.Println(fmt.Sprintf("Invalid path:%s", s.chartsPath))
+		}
 
-	charts["c1"] = c1
+		return nil
+	})
 
 	chartBytes, _ := json.Marshal(charts)
 	w.Write(chartBytes)
-
 }
