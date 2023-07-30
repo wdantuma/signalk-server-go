@@ -7,12 +7,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/lukeroth/gdal"
 	"github.com/wdantuma/signalk-server-go/s57"
 	"github.com/wdantuma/signalk-server-go/s57/dataset"
 	m "github.com/wdantuma/signalk-server-go/s57/mercantile"
 )
 
 func main() {
+
+	driver, err := gdal.GetDriverByName("S57")
+	if err != nil {
+		log.Fatal(err)
+	}
+	driver.Register()
 
 	outputPath := flag.String("out", "./static/charts", "Output directory for vector tiles")
 	inputPath := flag.String("in", "./charts", "Input path S-57 ENC's")

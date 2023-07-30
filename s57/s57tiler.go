@@ -40,12 +40,6 @@ func NewS57Tiler(datasets []dataset.Dataset) *s57Tiler {
 	dst := gdal.CreateSpatialReference("")
 	dst.FromEPSG(3857)
 
-	driver, err := gdal.GetDriverByName("S57")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	driver.Register()
-
 	return &s57Tiler{transform: gdal.CreateCoordinateTransform(src, dst), datasets: datasets}
 }
 
@@ -195,10 +189,12 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 		mvtFeature.Geometry = s.toMvtGeometry(*mvtFeature.Type, &geom, tileBounds)
 		// write tags
 		for i := 0; i < feature.FieldCount(); i++ {
-			key := feature.FieldDefinition(i).Name()
-			value := feature.FieldAsString(i)
-			if value != "" {
-				fieldType := feature.FieldDefinition(i).Type()
+			fieldDef := feature.FieldDefinition(i)
+			key := fieldDef.Name()
+			var value string = ""
+			fieldType := fieldDef.Type()
+			bytes := feature.FieldAsBinary(i)
+			if len(bytes) > 0 {
 				switch fieldType {
 				case gdal.FT_StringList:
 					parts := feature.FieldAsStringList(i)
@@ -206,10 +202,15 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 						value = strings.Join(parts, ",")
 					}
 					break
+				// case gdal.FT_Real:
+				// 	value = fmt.Sprintf("%f", feature.FieldAsFloat64(i))
+				// 	break
 				default:
 					value = feature.FieldAsString(i)
 				}
+			}
 
+			if value != "" {
 				if _, ok := s.keysMap[key]; !ok {
 					s.keysMap[key] = uint32(len(s.keys))
 					s.keys = append(s.keys, key)
@@ -221,6 +222,7 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 				mvtFeature.Tags = append(mvtFeature.Tags, s.keysMap[key])
 				mvtFeature.Tags = append(mvtFeature.Tags, s.valuesMap[value])
 			}
+			//fieldDef.Destroy()
 		}
 
 		return &mvtFeature
@@ -292,32 +294,40 @@ func (s *s57Tiler) GenerateMetaData(outPath string, dataset dataset.Dataset) {
 func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.TileID) {
 	mvtTile := vectortile.Tile{}
 
-	// for test only selected layers
+	tiledataSets := dataset.GetDatasetForTile(tile)
+	//layers := tiledataSets.GetLayers()
 
-	layers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE", "LNDARE", "BUAARE", "NAVLNE", "RECTRC", "CANALS"}
+	allowedLayers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE", "LNDARE", "BUAARE", "NAVLNE", "RECTRC", "CANALS"}
 
-	for _, layerName := range layers {
+	bounds := m.Bounds(tile)
+	tileEnvelope := gdal.Envelope{}
+	tileEnvelope.SetMaxX(bounds.E)
+	tileEnvelope.SetMaxY(bounds.N)
+	tileEnvelope.SetMinX(bounds.W)
+	tileEnvelope.SetMinY(bounds.S)
+
+	for _, layerName := range allowedLayers {
+		// include := false
+		// for _, ln := range allowedLayers {
+		// 	if layerName == ln {
+		// 		include = true
+		// 	}
+		// }
+		// if !include {
+		// 	continue
+		// }
+
 		ln := layerName
 		var version uint32 = 2
 		var extent uint32 = TILE_EXTENT
 		s.startLayer()
 		mvtLayer := vectortile.Tile_Layer{Name: &ln, Version: &version, Extent: &extent}
-		for _, file := range dataset.Files {
+		for _, file := range tiledataSets.Files {
 			datasource := gdal.OpenDataSource(file.Path, 0)
-
-			bounds := m.Bounds(tile)
-			tileEnvelope := gdal.Envelope{}
-			tileEnvelope.SetMaxX(bounds.E)
-			tileEnvelope.SetMaxY(bounds.N)
-			tileEnvelope.SetMinX(bounds.W)
-			tileEnvelope.SetMinY(bounds.S)
-
-			l := datasource.LayerByName(layerName)
-
-			c, ok := l.FeatureCount(false)
-			if ok && c > 0 {
-				ext, err := l.Extent(true)
-				if err == nil && ext.Intersects(tileEnvelope) {
+			if file.LayerExists(layerName) && file.Layers[layerName].Bounds.Intersects(tileEnvelope) {
+				l := datasource.LayerByName(layerName)
+				c, ok := l.FeatureCount(false)
+				if ok && c > 0 {
 					features := s.GetFeatures(l, tile, bounds)
 					mvtLayer.Features = append(mvtLayer.Features, features...)
 				}
