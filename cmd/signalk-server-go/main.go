@@ -81,7 +81,7 @@ func main() {
 			return true
 		}),
 	))
-	signalkServer := signalkserver.NewSignalkServer()
+	signalkServer := signalkserver.NewSignalkServer(*chartsPath)
 	if *debug {
 		signalkServer.SetDebug(true)
 		router.Use(loggingMiddleware)
