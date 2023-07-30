@@ -193,8 +193,7 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 			key := fieldDef.Name()
 			var value string = ""
 			fieldType := fieldDef.Type()
-			bytes := feature.FieldAsBinary(i)
-			if len(bytes) > 0 {
+			if feature.IsFieldSet(i) {
 				switch fieldType {
 				case gdal.FT_StringList:
 					parts := feature.FieldAsStringList(i)
@@ -208,21 +207,19 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 				default:
 					value = feature.FieldAsString(i)
 				}
-			}
-
-			if value != "" {
-				if _, ok := s.keysMap[key]; !ok {
-					s.keysMap[key] = uint32(len(s.keys))
-					s.keys = append(s.keys, key)
+				if value != "" {
+					if _, ok := s.keysMap[key]; !ok {
+						s.keysMap[key] = uint32(len(s.keys))
+						s.keys = append(s.keys, key)
+					}
+					if _, ok := s.valuesMap[value]; !ok {
+						s.valuesMap[value] = uint32(len(s.values))
+						s.values = append(s.values, value)
+					}
+					mvtFeature.Tags = append(mvtFeature.Tags, s.keysMap[key])
+					mvtFeature.Tags = append(mvtFeature.Tags, s.valuesMap[value])
 				}
-				if _, ok := s.valuesMap[value]; !ok {
-					s.valuesMap[value] = uint32(len(s.values))
-					s.values = append(s.values, value)
-				}
-				mvtFeature.Tags = append(mvtFeature.Tags, s.keysMap[key])
-				mvtFeature.Tags = append(mvtFeature.Tags, s.valuesMap[value])
 			}
-			//fieldDef.Destroy()
 		}
 
 		return &mvtFeature
@@ -295,9 +292,9 @@ func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.
 	mvtTile := vectortile.Tile{}
 
 	tiledataSets := dataset.GetDatasetForTile(tile)
-	//layers := tiledataSets.GetLayers()
+	layers := tiledataSets.GetLayers()
 
-	allowedLayers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE", "LNDARE", "BUAARE", "NAVLNE", "RECTRC", "CANALS"}
+	//allowedLayers := []string{"BOYLAT", "BOYCAR", "BOYINB", "BOYISD", "BOYSAW", "BOYSPP", "BCNLAT", "BCNCAR", "BCNISN", "BCNSAW", "BCNSPP", "LIGHTS", "DEPARE", "SEAARE", "COALNE", "RESARE", "UNSARE", "LNDARE", "BUAARE", "NAVLNE", "RECTRC", "CANALS"}
 
 	bounds := m.Bounds(tile)
 	tileEnvelope := gdal.Envelope{}
@@ -306,17 +303,7 @@ func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.
 	tileEnvelope.SetMinX(bounds.W)
 	tileEnvelope.SetMinY(bounds.S)
 
-	for _, layerName := range allowedLayers {
-		// include := false
-		// for _, ln := range allowedLayers {
-		// 	if layerName == ln {
-		// 		include = true
-		// 	}
-		// }
-		// if !include {
-		// 	continue
-		// }
-
+	for _, layerName := range layers {
 		ln := layerName
 		var version uint32 = 2
 		var extent uint32 = TILE_EXTENT
