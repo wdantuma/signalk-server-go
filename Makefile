@@ -22,6 +22,9 @@ buildarm:
 run: build
 	./build/${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
 
+runs57tiler: builds57tiler
+	CPL_LOG=/dev/null ./build/s57-tiler
+
 debug: build
 	./build/${BINARY_NAME} --mmsi 244810236 --debug  --file-source  samples/nemo-n2k.txt
 
