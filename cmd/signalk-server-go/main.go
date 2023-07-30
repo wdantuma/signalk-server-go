@@ -73,7 +73,7 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	//router.Use((loggingMiddleware))
+	router.Use((loggingMiddleware))
 	router.Use(handlers.CORS(
 		handlers.AllowCredentials(),
 		handlers.AllowedHeaders([]string{"authorization", "content-type", "dpop"}),
@@ -81,7 +81,7 @@ func main() {
 			return true
 		}),
 	))
-	signalkServer := signalkserver.NewSignalkServer(*chartsPath)
+	signalkServer := signalkserver.NewSignalkServer()
 	if *debug {
 		signalkServer.SetDebug(true)
 		router.Use(loggingMiddleware)
