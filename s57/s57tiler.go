@@ -231,7 +231,7 @@ func (s *s57Tiler) GetFeatures(layer gdal.Layer, tile m.TileID, tileBounds m.Ext
 
 	features := make([]*vectortile.Tile_Feature, 0)
 
-	layer.SetSpatialFilterRect(tileBounds.W, tileBounds.S, tileBounds.E, tileBounds.N)
+	layer.SetSpatialFilterRect(tileBounds.W-0.001, tileBounds.S-0.001, tileBounds.E+0.001, tileBounds.N+0.001)
 	for feature := layer.NextFeature(); feature != nil; feature = layer.NextFeature() {
 		mvtFeature := s.toMvtFeature(feature, tileBounds)
 		if mvtFeature != nil {
