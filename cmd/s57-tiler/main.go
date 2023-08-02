@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -21,13 +22,21 @@ func main() {
 	}
 	driver.Register()
 
+	// set gdal options
+	os.Setenv("OGR_GEOMETRY_ACCEPT_UNCLOSED_RING", "NO")
+
 	outputPath := flag.String("out", "./static/charts", "Output directory for vector tiles")
 	inputPath := flag.String("in", "./charts", "Input path S-57 ENC's")
 	minzoom := flag.Int("minzoom", 14, "Min zoom")
 	maxzoom := flag.Int("maxzoom", 14, "Max zoom")
 	boundsFlag := flag.String("bounds", "", "W,N,E,S")
+	debug := flag.Bool("debug", false, "Show debug info")
 	at := flag.String("at", "", "lon,lat")
 	flag.Parse()
+
+	if !*debug {
+		os.Setenv("CPL_LOG", "/dev/null") // supress gdal errors
+	}
 
 	datasets, err := dataset.GetS57Datasets(*inputPath)
 	if err != nil {
