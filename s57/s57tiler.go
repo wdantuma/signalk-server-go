@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/lukeroth/gdal"
+	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/resources/charts"
 	"github.com/wdantuma/signalk-server-go/s57/dataset"
 	m "github.com/wdantuma/signalk-server-go/s57/mercantile"
@@ -25,11 +26,24 @@ const (
 	TILE_EXTENT = 4096
 )
 
+type ValueType int
+
+const (
+	VT_STRING ValueType = iota
+	VT_INT
+	VT_FLOAT
+)
+
+type Value struct {
+	fieldType ValueType
+	value     interface{}
+}
+
 type s57Tiler struct {
 	transform gdal.CoordinateTransform
 	datasets  []dataset.Dataset
 	valuesMap map[string]uint32
-	values    []string
+	values    []Value
 	keysMap   map[string]uint32
 	keys      []string
 }
@@ -45,7 +59,7 @@ func NewS57Tiler(datasets []dataset.Dataset) *s57Tiler {
 
 func (s *s57Tiler) startLayer() {
 	s.valuesMap = make(map[string]uint32)
-	s.values = make([]string, 0)
+	s.values = make([]Value, 0)
 	s.keysMap = make(map[string]uint32)
 	s.keys = make([]string, 0)
 }
@@ -191,8 +205,9 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 		for i := 0; i < feature.FieldCount(); i++ {
 			fieldDef := feature.FieldDefinition(i)
 			key := fieldDef.Name()
-			var value string = ""
+			var value interface{}
 			fieldType := fieldDef.Type()
+			vt := VT_STRING
 			if feature.IsFieldSet(i) {
 				switch fieldType {
 				case gdal.FT_StringList:
@@ -201,23 +216,42 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 						value = strings.Join(parts, ",")
 					}
 					break
-				// case gdal.FT_Real:
-				// 	value = fmt.Sprintf("%f", feature.FieldAsFloat64(i))
-				// 	break
+				case gdal.FT_Integer:
+					vt = VT_INT
+					value = feature.FieldAsInteger64(i)
+					break
+				case gdal.FT_Real:
+					vt = VT_FLOAT
+					value = feature.FieldAsFloat64(i)
+					break
 				default:
 					value = feature.FieldAsString(i)
+					break
 				}
 				if value != "" {
 					if _, ok := s.keysMap[key]; !ok {
 						s.keysMap[key] = uint32(len(s.keys))
 						s.keys = append(s.keys, key)
 					}
-					if _, ok := s.valuesMap[value]; !ok {
-						s.valuesMap[value] = uint32(len(s.values))
-						s.values = append(s.values, value)
+					vmk := ""
+					switch vt {
+					case VT_STRING:
+						vmk = fmt.Sprintf("%d_%s", vt, value)
+						break
+					case VT_INT:
+						vmk = fmt.Sprintf("%d_%d", vt, value)
+						break
+					case VT_FLOAT:
+						vmk = fmt.Sprintf("%d_%f", vt, value)
+						break
+					}
+
+					if _, ok := s.valuesMap[vmk]; !ok {
+						s.valuesMap[vmk] = uint32(len(s.values))
+						s.values = append(s.values, Value{fieldType: vt, value: value})
 					}
 					mvtFeature.Tags = append(mvtFeature.Tags, s.keysMap[key])
-					mvtFeature.Tags = append(mvtFeature.Tags, s.valuesMap[value])
+					mvtFeature.Tags = append(mvtFeature.Tags, s.valuesMap[vmk])
 				}
 			}
 		}
@@ -328,8 +362,19 @@ func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.
 			}
 			// values
 			for _, v := range s.values {
-				vv := v
-				value := vectortile.Tile_Value{StringValue: &vv}
+				value := vectortile.Tile_Value{}
+				switch v.fieldType {
+				case VT_STRING:
+					value.StringValue = ref.String(v.value)
+					break
+				case VT_FLOAT:
+					value.DoubleValue = ref.Float64(v.value)
+					break
+				case VT_INT:
+					value.IntValue = ref.Int64((v.value))
+					break
+				}
+
 				mvtLayer.Values = append(mvtLayer.Values, &value)
 			}
 
