@@ -46,6 +46,8 @@ type s57Tiler struct {
 	values    []Value
 	keysMap   map[string]uint32
 	keys      []string
+	lastx     int32
+	lasty     int32
 }
 
 func NewS57Tiler(datasets []dataset.Dataset) *s57Tiler {
@@ -106,21 +108,25 @@ func (s *s57Tiler) toMvtLinestringGeometry(geometry *gdal.Geometry, tileBounds m
 		// moveto
 		mvtGeometry = append(mvtGeometry, getCommand(1, 1))
 		x, y, _ := geometry.Point(0)
-		lastx, lasty, _ := s.toTileCoordinate(tileBounds, x, y, 0)
-		mvtGeometry = append(mvtGeometry, getCoordinate(lastx))
-		mvtGeometry = append(mvtGeometry, getCoordinate(lasty))
+		xx, yy, _ := s.toTileCoordinate(tileBounds, x, y, 0)
+		dx := xx - s.lastx
+		dy := yy - s.lasty
+		s.lastx = xx
+		s.lasty = yy
+		mvtGeometry = append(mvtGeometry, getCoordinate(dx))
+		mvtGeometry = append(mvtGeometry, getCoordinate(dy))
 		// lineto
 		mvtGeometry = append(mvtGeometry, getCommand(2, geometry.PointCount()-1))
 		for i := 1; i < count; i++ {
 
 			x, y, _ := geometry.Point(i)
 			xx, yy, _ := s.toTileCoordinate(tileBounds, x, y, 0)
-			dx := xx - lastx
-			dy := yy - lasty
+			dx := xx - s.lastx
+			dy := yy - s.lasty
 			mvtGeometry = append(mvtGeometry, getCoordinate(dx))
 			mvtGeometry = append(mvtGeometry, getCoordinate(dy))
-			lastx = xx
-			lasty = yy
+			s.lastx = xx
+			s.lasty = yy
 		}
 	}
 
@@ -141,14 +147,20 @@ func (s *s57Tiler) toMvtPointGeometry(geometry *gdal.Geometry, tileBounds m.Extr
 	for i := 0; i < count; i++ {
 		x, y, _ := geometry.Point(i)
 		xx, yy, _ := s.toTileCoordinate(tileBounds, x, y, 0)
-		mvtGeometry = append(mvtGeometry, getCoordinate(xx))
-		mvtGeometry = append(mvtGeometry, getCoordinate(yy))
+		dx := xx - s.lastx
+		dy := yy - s.lasty
+		mvtGeometry = append(mvtGeometry, getCoordinate(dx))
+		mvtGeometry = append(mvtGeometry, getCoordinate(dy))
+		s.lastx = xx
+		s.lasty = yy
 	}
 
 	return mvtGeometry
 }
 
 func (s *s57Tiler) toMvtGeometry(featureType vectortile.Tile_GeomType, geometry *gdal.Geometry, tileBounds m.Extrema) []uint32 {
+	s.lastx = 0
+	s.lasty = 0
 	mvtGeometry := make([]uint32, 0)
 	geomcount := geometry.GeometryCount()
 	pointCount := geometry.PointCount()
