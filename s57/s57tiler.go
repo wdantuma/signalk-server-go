@@ -394,7 +394,7 @@ func (s *s57Tiler) GenerateTile(outPath string, dataset dataset.Dataset, tile m.
 		}
 	}
 
-	path := filepath.Join(outPath, dataset.Id, strconv.Itoa(int(tile.X)), strconv.Itoa(int(tile.Y)), strconv.Itoa(int(tile.Z)))
+	path := filepath.Join(outPath, dataset.Id, strconv.Itoa(int(tile.Z)), strconv.Itoa(int(tile.X)), strconv.Itoa(int(tile.Y))) + ".pbf"
 	if len(mvtTile.Layers) > 0 {
 		out, _ := proto.Marshal(&mvtTile)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
