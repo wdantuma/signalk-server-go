@@ -93,6 +93,8 @@ make builds57tiler
 ./build/s57-tiler --in <path to directory tree container catalog.031 files> --out ./static/charts
 ```
 
+![S57 Screenshot](img/screenshot-2.jpg)
+
 More options
 ```
 $ build/s57-tiler --help
