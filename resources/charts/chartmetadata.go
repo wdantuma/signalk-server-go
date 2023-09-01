@@ -5,11 +5,13 @@ import (
 )
 
 type ChartMetaData struct {
-	Id           string    `json:"id,omitempty"`
-	Name         string    `json:"name,omitempty"`
-	Description  string    `json:"description,omitempty"`
-	Created      time.Time `json:"created,omitempty"`
-	ChartUpdated time.Time `json:"chartupdated,omitempty"`
-	ChartType    string    `json:"charttype,omitempty"`
-	ChartFormat  string    `json:"chartformat,omitempty"`
+	Id          string    `json:"id,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Created     time.Time `json:"created,omitempty"`
+	Updated     time.Time `json:"updated,omitempty"`
+	Type        string    `json:"type,omitempty"`
+	Format      string    `json:"format,omitempty"`
+	MinZoom     int       `json:"minzoom,omitempty"`
+	MaxZoom     int       `json:"maxzoom,omitempty"`
 }

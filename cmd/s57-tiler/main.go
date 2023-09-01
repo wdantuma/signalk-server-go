@@ -89,7 +89,7 @@ func main() {
 		}
 	}
 
-	tiler := s57.NewS57Tiler(datasets)
+	tiler := s57.NewS57Tiler(datasets, *minzoom, *maxzoom)
 
 	for z := *minzoom; z <= *maxzoom; z++ {
 		var tiles map[string]m.TileID = make(map[string]m.TileID)

@@ -89,7 +89,12 @@ func GetS57Datasets(path string) ([]Dataset, error) {
 				return err
 			}
 			if strings.ToUpper(info.Name()) == "CATALOG.031" {
-				dataset := Dataset{Id: "test", Description: ""}
+				parts := strings.Split(fp, string(os.PathSeparator))
+				id := "test"
+				if len(parts) > 2 {
+					id = parts[len(parts)-3]
+				}
+				dataset := Dataset{Id: id, Description: ""}
 				f, err := os.Open(fp)
 				if err != nil {
 					return err

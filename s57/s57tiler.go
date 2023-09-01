@@ -40,6 +40,8 @@ type Value struct {
 }
 
 type s57Tiler struct {
+	minZoom   int
+	maxZoom   int
 	transform gdal.CoordinateTransform
 	datasets  []dataset.Dataset
 	valuesMap map[string]uint32
@@ -50,13 +52,13 @@ type s57Tiler struct {
 	lasty     int32
 }
 
-func NewS57Tiler(datasets []dataset.Dataset) *s57Tiler {
+func NewS57Tiler(datasets []dataset.Dataset, minzoom int, maxzoom int) *s57Tiler {
 	src := gdal.CreateSpatialReference("")
 	src.FromEPSG(4326)
 	dst := gdal.CreateSpatialReference("")
 	dst.FromEPSG(3857)
 
-	return &s57Tiler{transform: gdal.CreateCoordinateTransform(src, dst), datasets: datasets}
+	return &s57Tiler{transform: gdal.CreateCoordinateTransform(src, dst), datasets: datasets, minZoom: minzoom, maxZoom: maxzoom}
 }
 
 func (s *s57Tiler) startLayer() {
@@ -321,8 +323,8 @@ func (s *s57Tiler) GetTiles(dataset dataset.Dataset, zoomLevel int) map[string]m
 }
 
 func (s *s57Tiler) GenerateMetaData(outPath string, dataset dataset.Dataset) {
-	path := filepath.Join(outPath, dataset.Id, "sk-chart-meta.json")
-	metaData := charts.ChartMetaData{Id: dataset.Id, Name: dataset.Id, Created: time.Now().UTC(), ChartType: "S-57", ChartFormat: "pbf"}
+	path := filepath.Join(outPath, dataset.Id, "metadata.json")
+	metaData := charts.ChartMetaData{Id: dataset.Id, Name: dataset.Id, Description: dataset.Description, Created: time.Now().UTC(), Type: "S-57", Format: "pbf", MinZoom: s.minZoom, MaxZoom: s.maxZoom}
 
 	out, _ := json.Marshal(metaData)
 	if _, err := os.Stat(path); os.IsNotExist(err) {

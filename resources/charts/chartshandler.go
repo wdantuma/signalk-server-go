@@ -35,7 +35,7 @@ func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return nil
 			}
 			name := info.Name()
-			if strings.ToUpper(name) == "SK-CHART-META.JSON" {
+			if strings.ToUpper(name) == "METADATA.JSON" {
 				jsonFile, err := os.Open(fp)
 				if err == nil {
 					metaData := ChartMetaData{}
@@ -49,10 +49,10 @@ func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						chart["identifier"] = metaData.Id
 						chart["name"] = metaData.Name
 						chart["description"] = metaData.Description
-						chart["format"] = metaData.ChartFormat
-						chart["type"] = metaData.ChartType
-						chart["minzoom"] = 14
-						chart["maxzoom"] = 14
+						chart["format"] = metaData.Format
+						chart["type"] = metaData.Type
+						chart["minzoom"] = metaData.MinZoom
+						chart["maxzoom"] = metaData.MaxZoom
 						chart["url"] = fmt.Sprintf("/charts/%s/{z}/{x}/{y}.pbf", metaData.Id)
 						charts[metaData.Id] = chart
 					} else {
