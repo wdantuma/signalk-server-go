@@ -225,10 +225,8 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 			if feature.IsFieldSet(i) {
 				switch fieldType {
 				case gdal.FT_StringList:
-					parts := feature.FieldAsStringList(i)
-					if parts != nil {
-						value = strings.Join(parts, ",")
-					}
+					st := string(feature.FieldAsString(i))
+					value = st[strings.Index(st, ":")+1 : len(st)-1]
 					break
 				case gdal.FT_Integer:
 					vt = VT_INT
