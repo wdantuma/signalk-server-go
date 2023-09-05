@@ -6,10 +6,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/lukeroth/gdal v0.0.0-20230422025444-05e99f726ff9
-	github.com/tburke/iso8211 v0.0.0-20190905204635-916caaad4cc1
 	go.einride.tech/can v0.5.5
-	google.golang.org/protobuf v1.31.0
 )
 
 require (
