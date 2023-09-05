@@ -14,20 +14,14 @@ webapps:
 build/${BINARY_NAME}: 
 	GOARCH=amd64 GOOS=linux go build -o build/${BINARY_NAME} -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
-build/s57-tiler:
-	GOARCH=amd64 GOOS=linux go build -o build/s57-tiler  ./cmd/s57-tiler	
 
-
-build: build/${BINARY_NAME} build/s57-tiler
+build: build/${BINARY_NAME}
 
 buildarm:
 	GOARCH=arm GOOS=linux go build -o build/${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
 run: build
 	./build/${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
-
-runs57tiler: build/s57-tiler
-	./build/s57-tiler
 
 debug: build
 	./build/${BINARY_NAME} --mmsi 244810236 --debug  --file-source  samples/nemo-n2k.txt
