@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -276,8 +277,11 @@ func (s *s57Tiler) toMvtFeature(feature *gdal.Feature, tileBounds m.Extrema) *ve
 func (s *s57Tiler) GetFeatures(layer gdal.Layer, tile m.TileID, tileBounds m.Extrema) []*vectortile.Tile_Feature {
 
 	features := make([]*vectortile.Tile_Feature, 0)
+	b2 := m.Bounds(m.TileID{X: tile.X + 1, Y: tile.Y, Z: tile.Z})
+	buffer := math.Abs(tileBounds.E-b2.E) / 4
+	bounds := m.Extrema{N: tileBounds.N + buffer, S: tileBounds.S - buffer, W: tileBounds.W - buffer, E: tileBounds.E + buffer}
 
-	layer.SetSpatialFilterRect(tileBounds.W-0.001, tileBounds.S-0.001, tileBounds.E+0.001, tileBounds.N+0.001)
+	layer.SetSpatialFilterRect(bounds.W, bounds.S, bounds.E, bounds.N)
 	for feature := layer.NextFeature(); feature != nil; feature = layer.NextFeature() {
 		mvtFeature := s.toMvtFeature(feature, tileBounds)
 		if mvtFeature != nil {
