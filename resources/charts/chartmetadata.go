@@ -14,6 +14,6 @@ type ChartMetaData struct {
 	Format      string    `json:"format,omitempty"`
 	MinZoom     int       `json:"minzoom,omitempty"`
 	MaxZoom     int       `json:"maxzoom,omitempty"`
-	Bounds      []int     `json:"bounds,omitempty"`
+	Bounds      []float32 `json:"bounds,omitempty"`
 	Scale       int       `json:"scale,omitempty"`
 }
