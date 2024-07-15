@@ -53,6 +53,7 @@ func (s *chartsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						chart["type"] = metaData.Type
 						chart["minzoom"] = metaData.MinZoom
 						chart["maxzoom"] = metaData.MaxZoom
+						chart["bounds"] = metaData.Bounds
 						chart["url"] = fmt.Sprintf("/charts/%s/{z}/{x}/{y}.pbf", metaData.Id)
 						charts[metaData.Id] = chart
 					} else {
