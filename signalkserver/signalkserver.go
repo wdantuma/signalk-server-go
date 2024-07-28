@@ -123,7 +123,7 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	chartsHandler := charts.NewChartsHandler(server.chartsPath)
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
 	signalk.PathPrefix("/v1/api/vessels").Handler(vesselHandler)
-	signalk.PathPrefix("/v1/api/resources/charts").Handler(chartsHandler)
+	signalk.PathPrefix("/v2/api/resources/charts").Handler(chartsHandler)
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
