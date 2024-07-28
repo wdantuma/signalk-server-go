@@ -1,9 +1,9 @@
 VERSION=0.0.1
 BINARY_NAME=signalk-server-go
 FREEBOARD_PACKAGE=@signalk/freeboard-sk
-FREEBOARD_VERSION=2.8.4
+FREEBOARD_VERSION=2.10.0
 INSTRUMENTPANEL_PACKAGE=@signalk/instrumentpanel
-INSTRUMENTPANEL_VERSION=0.24.0
+INSTRUMENTPANEL_VERSION=0.25.0
 CANBOARD_VERSION=5.0.1
 
 
@@ -21,7 +21,7 @@ buildarm:
 	GOARCH=arm GOOS=linux go build -o build/${BINARY_NAME}-arm -ldflags="-X 'github.com/wdantuma/signalk-server-go/signalkserver.Version=${VERSION}'" ./cmd/signalk-server-go
 
 run: build
-	./build/${BINARY_NAME} --mmsi 244810236 --file-source  samples/nemo-n2k.txt
+	./build/${BINARY_NAME} --port 3001 --mmsi 244810236 --file-source  samples/nemo-n2k.txt
 
 debug: build
 	./build/${BINARY_NAME} --mmsi 244810236 --debug  --file-source  samples/nemo-n2k.txt
