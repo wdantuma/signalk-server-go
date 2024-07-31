@@ -96,6 +96,18 @@ func (server *signalkServer) hello(w http.ResponseWriter, req *http.Request) {
 `, method, req.Host, wsmethod, req.Host, server.GetVersion())
 }
 
+func (server *signalkServer) features(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `
+	{
+		"apis": [
+		   "resources"
+		 ],
+		 "plugins":[]
+	}
+`)
+}
+
 func (server *signalkServer) loginStatus(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `
@@ -121,13 +133,15 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	vesselHandler := vessel.NewVesselHandler(server)
 	chartsHandler := charts.NewChartsHandler(server.chartsPath)
 	signalk.PathPrefix("/v1/stream").Handler(streamHandler)
+	signalk.HandleFunc("/v2/features", server.features)
 	signalk.PathPrefix("/v1/api/vessels").Handler(vesselHandler)
 	signalk.PathPrefix("/v2/api/resources/charts").Handler(chartsHandler)
+	signalk.PathPrefix("/v1/api/resources/charts").Handler(chartsHandler)
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
 	signalk.HandleFunc("/", server.hello)
-	signalk.Handle("", http.RedirectHandler("/", http.StatusSeeOther))
+	signalk.Handle("", http.RedirectHandler("/signalk/", http.StatusSeeOther))
 
 	router.HandleFunc("/skServer/loginStatus", server.loginStatus)
 
