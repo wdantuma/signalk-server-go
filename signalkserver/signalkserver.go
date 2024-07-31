@@ -117,7 +117,6 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	}
 
 	signalk := router.PathPrefix("/signalk").Subrouter()
-	signalk.HandleFunc("", server.hello)
 	streamHandler := stream.NewStreamHandler(server)
 	vesselHandler := vessel.NewVesselHandler(server)
 	chartsHandler := charts.NewChartsHandler(server.chartsPath)
@@ -127,6 +126,8 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 	signalk.HandleFunc("/v1/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	})
+	signalk.HandleFunc("/", server.hello)
+	signalk.Handle("", http.RedirectHandler("/", http.StatusSeeOther))
 
 	router.HandleFunc("/skServer/loginStatus", server.loginStatus)
 
