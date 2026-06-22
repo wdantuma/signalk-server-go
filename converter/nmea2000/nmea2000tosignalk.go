@@ -1,31 +1,31 @@
-package converter
+package nmea2000
 
 import (
 	"log"
 
 	"github.com/wdantuma/signalk-server-go/canboat"
-	"github.com/wdantuma/signalk-server-go/converter/pgn"
+	"github.com/wdantuma/signalk-server-go/converter/nmea2000/pgn"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
-	"github.com/wdantuma/signalk-server-go/source"
+	"github.com/wdantuma/signalk-server-go/source/can"
 )
 
-type canToSignalk struct {
+type nme2000ToSignalk struct {
 	canboat *canboat.Canboat
 	pgn     map[uint]*pgn.PgnBase
 	state   state.ServerState
 }
 
-type CanToSignalk interface {
-	Convert(<-chan source.SourceFrame) <-chan signalk.DeltaJson
+type Nmea2000ToSignalk interface {
+	Convert(<-chan can.SourceFrame) <-chan signalk.DeltaJson
 }
 
-func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
+func NewNmea2000ToSignalk(state state.ServerState) (*nme2000ToSignalk, error) {
 	canboat, err := canboat.NewCanboat()
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := canToSignalk{canboat: canboat, state: state, pgn: make(map[uint]*pgn.PgnBase)}
+	c := nme2000ToSignalk{canboat: canboat, state: state, pgn: make(map[uint]*pgn.PgnBase)}
 	c.addPgn(pgn.NewPgn130306())
 	c.addPgn(pgn.NewPgn129038())
 	c.addPgn(pgn.NewPgn129039())
@@ -38,13 +38,13 @@ func NewCanToSignalk(state state.ServerState) (*canToSignalk, error) {
 	return &c, nil
 }
 
-func (c *canToSignalk) addPgn(b *pgn.PgnBase) {
+func (c *nme2000ToSignalk) addPgn(b *pgn.PgnBase) {
 	if b.Init(c.canboat, c.state) {
 		c.pgn[b.Pgn] = b
 	}
 }
 
-func (c *canToSignalk) getPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase, bool) {
+func (c *nme2000ToSignalk) getPgnConverter(frame can.ExtendedFrame) (*pgn.PgnBase, bool) {
 	pgn := frame.ID & 0x03FFFF00 >> 8
 	pgnConverter, ok := c.pgn[uint(pgn)]
 	if ok {
@@ -53,14 +53,14 @@ func (c *canToSignalk) getPgnConverter(frame source.ExtendedFrame) (*pgn.PgnBase
 	return nil, false
 }
 
-func (c *canToSignalk) Convert(canSource <-chan source.SourceFrame) <-chan signalk.DeltaJson {
+func (c *nme2000ToSignalk) Convert(canSource <-chan can.SourceFrame) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
-	fastframes := make(map[string]*source.ExtendedFrame)
+	fastframes := make(map[string]*can.ExtendedFrame)
 	go func() {
 		for {
 			sourceFrame, ok := <-canSource
 			if ok {
-				frame := source.NewExtendedFrame(&sourceFrame.Frame)
+				frame := can.NewExtendedFrame(&sourceFrame.Frame)
 				pgnConverter, ok := c.getPgnConverter(frame)
 				if ok {
 					if pgnConverter.PgnInfo.Type == "Fast" {

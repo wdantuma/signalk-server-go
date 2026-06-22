@@ -13,8 +13,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
-	"github.com/wdantuma/signalk-server-go/source/cansource"
-	"github.com/wdantuma/signalk-server-go/source/filesource"
+	"github.com/wdantuma/signalk-server-go/source/can"
+	"github.com/wdantuma/signalk-server-go/source/can/filesource"
 )
 
 type arrayFlag []string
@@ -110,7 +110,7 @@ func main() {
 
 	if len(sources) > 0 {
 		for _, s := range sources {
-			canSource, err := cansource.NewCanSource(s)
+			canSource, err := can.NewCanSource(s)
 			if err != nil {
 				log.Fatal(err)
 			} else {

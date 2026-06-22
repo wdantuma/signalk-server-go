@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/wdantuma/signalk-server-go/converter"
+	"github.com/wdantuma/signalk-server-go/converter/nmea2000"
 	"github.com/wdantuma/signalk-server-go/resources/charts"
-	"github.com/wdantuma/signalk-server-go/source"
+	"github.com/wdantuma/signalk-server-go/source/can"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 	"github.com/wdantuma/signalk-server-go/vessel"
@@ -28,14 +28,14 @@ type signalkServer struct {
 	self       string
 	debug      bool
 	store      store.Store
-	sourcehub  *source.Sourcehub
-	converter  converter.CanToSignalk
+	sourcehub  *can.Sourcehub
+	converter  nmea2000.Nmea2000ToSignalk
 	chartsPath string
 }
 
 func NewSignalkServer(chartsPath string) *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
-	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: source.NewSourceHub(), chartsPath: chartsPath}
+	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: can.NewSourceHub(), chartsPath: chartsPath}
 }
 
 func (s *signalkServer) GetName() string {
@@ -66,7 +66,7 @@ func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
 
-func (server *signalkServer) AddSource(source source.CanSource) {
+func (server *signalkServer) AddSource(source can.CanSource) {
 	server.sourcehub.AddSource(source)
 }
 
@@ -141,11 +141,11 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 		w.WriteHeader(http.StatusNotImplemented)
 	})
 	signalk.HandleFunc("/", server.hello)
-	signalk.Handle("", http.RedirectHandler("/signalk/", http.StatusSeeOther))
+	signalk.HandleFunc("", server.hello)
 
 	router.HandleFunc("/skServer/loginStatus", server.loginStatus)
 
-	server.converter, err = converter.NewCanToSignalk(server)
+	server.converter, err = nmea2000.NewNmea2000ToSignalk(server)
 	if err != nil {
 		log.Fatal(err)
 	}

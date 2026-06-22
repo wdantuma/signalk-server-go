@@ -1,4 +1,4 @@
-package cansource
+package can
 
 import (
 	"log"

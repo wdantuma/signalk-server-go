@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wdantuma/signalk-server-go/source"
-	"github.com/wdantuma/signalk-server-go/source/filesource/actisensesource"
-	"github.com/wdantuma/signalk-server-go/source/filesource/candumpsource"
+	"github.com/wdantuma/signalk-server-go/source/can"
+	"github.com/wdantuma/signalk-server-go/source/can/filesource/actisensesource"
+	"github.com/wdantuma/signalk-server-go/source/can/filesource/candumpsource"
 )
 
-func CreateFileSource(filename string) (source.CanSource, error) {
+func CreateFileSource(filename string) (can.CanSource, error) {
 
 	// very simple factory impl for now
 
