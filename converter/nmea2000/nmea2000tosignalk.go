@@ -7,7 +7,8 @@ import (
 	"github.com/wdantuma/signalk-server-go/converter/nmea2000/pgn"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
-	"github.com/wdantuma/signalk-server-go/source/can"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000"
+	"go.einride.tech/can"
 )
 
 type nme2000ToSignalk struct {
@@ -17,7 +18,7 @@ type nme2000ToSignalk struct {
 }
 
 type Nmea2000ToSignalk interface {
-	Convert(<-chan can.SourceFrame) <-chan signalk.DeltaJson
+	Convert(string, <-chan can.Frame) <-chan signalk.DeltaJson
 }
 
 func NewNmea2000ToSignalk(state state.ServerState) (*nme2000ToSignalk, error) {
@@ -44,7 +45,7 @@ func (c *nme2000ToSignalk) addPgn(b *pgn.PgnBase) {
 	}
 }
 
-func (c *nme2000ToSignalk) getPgnConverter(frame can.ExtendedFrame) (*pgn.PgnBase, bool) {
+func (c *nme2000ToSignalk) getPgnConverter(frame nmea2000.ExtendedFrame) (*pgn.PgnBase, bool) {
 	pgn := frame.ID & 0x03FFFF00 >> 8
 	pgnConverter, ok := c.pgn[uint(pgn)]
 	if ok {
@@ -53,33 +54,33 @@ func (c *nme2000ToSignalk) getPgnConverter(frame can.ExtendedFrame) (*pgn.PgnBas
 	return nil, false
 }
 
-func (c *nme2000ToSignalk) Convert(canSource <-chan can.SourceFrame) <-chan signalk.DeltaJson {
+func (c *nme2000ToSignalk) Convert(label string, canSource <-chan can.Frame) <-chan signalk.DeltaJson {
 	output := make(chan signalk.DeltaJson)
-	fastframes := make(map[string]*can.ExtendedFrame)
+	fastframes := make(map[string]*nmea2000.ExtendedFrame)
 	go func() {
 		for {
-			sourceFrame, ok := <-canSource
+			canFrame, ok := <-canSource
 			if ok {
-				frame := can.NewExtendedFrame(&sourceFrame.Frame)
+				frame := nmea2000.NewExtendedFrame(&canFrame)
 				pgnConverter, ok := c.getPgnConverter(frame)
 				if ok {
 					if pgnConverter.PgnInfo.Type == "Fast" {
 						seqNr := frame.UnsignedBitsLittleEndian(0, 4)
 						//frameNr := frame.UnsignedBitsLittleEndian(4, 4)
 						if seqNr == 0 {
-							fastframes[sourceFrame.Label] = frame.First()
+							fastframes[label] = frame.First()
 							continue
 						} else {
-							if fastframes[sourceFrame.Label].Next(frame) {
-								frame = *fastframes[sourceFrame.Label]
-								delete(fastframes, sourceFrame.Label)
+							if fastframes[label].Next(frame) {
+								frame = *fastframes[label]
+								delete(fastframes, label)
 							} else {
 								continue
 							}
 						}
 					}
 
-					delta, convertOk := pgnConverter.Convert(frame, sourceFrame.Label)
+					delta, convertOk := pgnConverter.Convert(frame, label)
 					if convertOk && delta.Context != nil {
 						output <- delta
 					}

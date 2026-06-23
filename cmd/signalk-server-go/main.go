@@ -13,8 +13,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
-	"github.com/wdantuma/signalk-server-go/source/can"
-	"github.com/wdantuma/signalk-server-go/source/can/filesource"
+	"github.com/wdantuma/signalk-server-go/source"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000"
 )
 
 type arrayFlag []string
@@ -81,7 +81,11 @@ func main() {
 			return true
 		}),
 	))
-	signalkServer := signalkserver.NewSignalkServer(*chartsPath)
+
+	signalkServer := signalkserver.NewSignalkServer()
+	if *chartsPath != "" {
+		signalkServer.SetChartsPath(*chartsPath)
+	}
 	if *debug {
 		signalkServer.SetDebug(true)
 		router.Use(loggingMiddleware)
@@ -99,7 +103,7 @@ func main() {
 
 	if len(fileSources) > 0 {
 		for _, fs := range fileSources {
-			canSource, err := filesource.CreateFileSource(fs)
+			canSource, err := source.CreateFileSource(fs)
 			if err != nil {
 				log.Fatal(err)
 			} else {
@@ -110,7 +114,7 @@ func main() {
 
 	if len(sources) > 0 {
 		for _, s := range sources {
-			canSource, err := can.NewCanSource(s)
+			canSource, err := nmea2000.NewCanSource(s)
 			if err != nil {
 				log.Fatal(err)
 			} else {

@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/wdantuma/signalk-server-go/converter/nmea2000"
+	nmea2000converter "github.com/wdantuma/signalk-server-go/converter/nmea2000"
 	"github.com/wdantuma/signalk-server-go/resources/charts"
-	"github.com/wdantuma/signalk-server-go/source/can"
+	"github.com/wdantuma/signalk-server-go/source"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 	"github.com/wdantuma/signalk-server-go/vessel"
@@ -23,19 +23,26 @@ const (
 )
 
 type signalkServer struct {
-	name       string
-	version    string
-	self       string
-	debug      bool
-	store      store.Store
-	sourcehub  *can.Sourcehub
-	converter  nmea2000.Nmea2000ToSignalk
+	name      string
+	version   string
+	self      string
+	debug     bool
+	store     store.Store
+	sourcehub *source.Sourcehub
+
 	chartsPath string
 }
 
-func NewSignalkServer(chartsPath string) *signalkServer {
+func NewSignalkServer() *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
-	return &signalkServer{name: SERVER_NAME, version: Version, self: self, sourcehub: can.NewSourceHub(), chartsPath: chartsPath}
+	server := &signalkServer{name: SERVER_NAME, version: Version, self: self}
+
+	n2kConverter, err := nmea2000converter.NewNmea2000ToSignalk(server)
+	if err != nil {
+		log.Fatal(err)
+	}
+	server.sourcehub = source.NewSourceHub(n2kConverter)
+	return server
 }
 
 func (s *signalkServer) GetName() string {
@@ -58,6 +65,10 @@ func (s *signalkServer) SetDebug(debug bool) {
 	s.debug = debug
 }
 
+func (s *signalkServer) SetChartsPath(chartsPath string) {
+	s.chartsPath = chartsPath
+}
+
 func (s *signalkServer) GetStore() store.Store {
 	return s.store
 }
@@ -66,7 +77,7 @@ func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
 
-func (server *signalkServer) AddSource(source can.CanSource) {
+func (server *signalkServer) AddSource(source any) {
 	server.sourcehub.AddSource(source)
 }
 
@@ -123,7 +134,6 @@ func (server *signalkServer) loginStatus(w http.ResponseWriter, req *http.Reques
 }
 
 func (server *signalkServer) SetupServer(ctx context.Context, hostname string, router *mux.Router) *mux.Router {
-	var err error
 	if router == nil {
 		router = mux.NewRouter()
 	}
@@ -145,16 +155,10 @@ func (server *signalkServer) SetupServer(ctx context.Context, hostname string, r
 
 	router.HandleFunc("/skServer/loginStatus", server.loginStatus)
 
-	server.converter, err = nmea2000.NewNmea2000ToSignalk(server)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	canSource := server.sourcehub.Start()
-	converted := server.converter.Convert(canSource)
+	hub := server.sourcehub.Start()
 	valueStore := store.NewMemoryStore()
 	server.store = valueStore
-	stored := valueStore.Store(converted)
+	stored := valueStore.Store(hub)
 
 	go func() {
 		for delta := range stored {

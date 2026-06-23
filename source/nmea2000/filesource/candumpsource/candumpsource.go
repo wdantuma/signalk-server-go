@@ -15,7 +15,7 @@ type canDumpSource struct {
 	label  string
 }
 
-func (cd *canDumpSource) Source() chan can.Frame {
+func (cd *canDumpSource) Source() <-chan can.Frame {
 	return cd.source
 }
 

@@ -10,7 +10,7 @@ import (
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
-	cansource "github.com/wdantuma/signalk-server-go/source/can"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000"
 	"go.einride.tech/can"
 )
 
@@ -38,7 +38,7 @@ type PgnBase struct {
 }
 
 type Pgn interface {
-	Convert(can.Frame, cansource.CanSource) (signalk.DeltaJson, bool)
+	Convert(can.Frame, nmea2000.Nmea2000Source) (signalk.DeltaJson, bool)
 }
 
 func NewPgnBase(pgn uint) *PgnBase {
@@ -46,7 +46,7 @@ func NewPgnBase(pgn uint) *PgnBase {
 
 }
 
-func (base *PgnBase) getDelta(frame cansource.ExtendedFrame, source string) signalk.DeltaJson {
+func (base *PgnBase) getDelta(frame nmea2000.ExtendedFrame, source string) signalk.DeltaJson {
 	src := frame.ID & 0xFF
 	delta := signalk.DeltaJson{}
 	delta.Context = ref.String(base.State.GetSelf())
@@ -64,7 +64,7 @@ func (base *PgnBase) getDelta(frame cansource.ExtendedFrame, source string) sign
 	return delta
 }
 
-func (pgn *PgnBase) Convert(frame cansource.ExtendedFrame, source string) (signalk.DeltaJson, bool) {
+func (pgn *PgnBase) Convert(frame nmea2000.ExtendedFrame, source string) (signalk.DeltaJson, bool) {
 	delta := pgn.getDelta(frame, source)
 
 	lookupFieldTypeField := canboat.Field{}

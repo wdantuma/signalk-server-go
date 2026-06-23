@@ -1,4 +1,4 @@
-package filesource
+package source
 
 import (
 	"bufio"
@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wdantuma/signalk-server-go/source/can"
-	"github.com/wdantuma/signalk-server-go/source/can/filesource/actisensesource"
-	"github.com/wdantuma/signalk-server-go/source/can/filesource/candumpsource"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000/filesource/actisensesource"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000/filesource/candumpsource"
 )
 
-func CreateFileSource(filename string) (can.CanSource, error) {
+func CreateFileSource(filename string) (nmea2000.Nmea2000Source, error) {
 
 	// very simple factory impl for now
 

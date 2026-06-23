@@ -1,4 +1,4 @@
-package can
+package nmea2000
 
 import (
 	"go.einride.tech/can"
