@@ -3,42 +3,26 @@ package source
 import (
 	"reflect"
 
-	// nmea0183converter "github.com/wdantuma/signalk-server-go/converter/nmea0183"
-	nmea2000converter "github.com/wdantuma/signalk-server-go/converter/nmea2000"
 	"github.com/wdantuma/signalk-server-go/signalk"
-	nmea2000source "github.com/wdantuma/signalk-server-go/source/nmea2000"
+	"github.com/wdantuma/signalk-server-go/source/base"
 	"go.einride.tech/can"
 )
 
 type Sourcehub struct {
-	inputs       []DeltaSource
-	output       chan signalk.DeltaJson
-	started      bool
-	n2kConverter nmea2000converter.Nmea2000ToSignalk
-	// nmeaConverter nmea0183converter.Nmea0183ToSignalk
-
+	inputs  []base.DeltaSource
+	output  chan signalk.DeltaJson
+	started bool
 }
 
-func NewSourceHub(n2kConverter nmea2000converter.Nmea2000ToSignalk) *Sourcehub {
+func NewSourceHub() *Sourcehub {
 	sourceHub := &Sourcehub{}
 	sourceHub.output = make(chan signalk.DeltaJson)
-	sourceHub.n2kConverter = n2kConverter
 
 	return sourceHub
 }
 
-func (sh *Sourcehub) AddSource(source any) {
-	var ds *deltaSource
-	switch v := source.(type) {
-	case nmea2000source.Nmea2000Source:
-		c := v.Source()
-		l := v.Label()
-		source := sh.n2kConverter.Convert(l, c)
-		ds = &deltaSource{source: source, label: v.Label()}
-		sh.inputs = append(sh.inputs, ds)
-	default:
-		break
-	}
+func (sh *Sourcehub) AddSource(source base.DeltaSource) {
+	sh.inputs = append(sh.inputs, source)
 }
 
 func (sh *Sourcehub) Sources() []string {
@@ -87,6 +71,10 @@ func (sh *Sourcehub) startInternal() <-chan signalk.DeltaJson {
 			close(sh.output)
 		}()
 		sh.started = true
+		// start inputs
+		for _, input := range sh.inputs {
+			input.Start()
+		}
 	}
 	return sh.output
 }

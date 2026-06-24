@@ -11,7 +11,9 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/signalk-server-go",
-            "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/nemo-n2k-20230719.txt" ]
+            // "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
+            // "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
+            "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--udp","255.255.255.255:10110" ]
         }
     ]
 }

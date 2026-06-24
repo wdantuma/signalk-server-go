@@ -3,14 +3,13 @@ package signalkserver
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	nmea2000converter "github.com/wdantuma/signalk-server-go/converter/nmea2000"
 	"github.com/wdantuma/signalk-server-go/resources/charts"
 	"github.com/wdantuma/signalk-server-go/source"
+	"github.com/wdantuma/signalk-server-go/source/base"
 	"github.com/wdantuma/signalk-server-go/store"
 	"github.com/wdantuma/signalk-server-go/stream"
 	"github.com/wdantuma/signalk-server-go/vessel"
@@ -37,11 +36,7 @@ func NewSignalkServer() *signalkServer {
 	self := fmt.Sprintf("vessels.urn:mrn:signalk:uuid:%s", uuid.New().String())
 	server := &signalkServer{name: SERVER_NAME, version: Version, self: self}
 
-	n2kConverter, err := nmea2000converter.NewNmea2000ToSignalk(server)
-	if err != nil {
-		log.Fatal(err)
-	}
-	server.sourcehub = source.NewSourceHub(n2kConverter)
+	server.sourcehub = source.NewSourceHub()
 	return server
 }
 
@@ -77,7 +72,7 @@ func (s *signalkServer) SetMMSI(mmsi string) {
 	s.self = fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", mmsi)
 }
 
-func (server *signalkServer) AddSource(source any) {
+func (server *signalkServer) AddSource(source base.DeltaSource) {
 	server.sourcehub.AddSource(source)
 }
 

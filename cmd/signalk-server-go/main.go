@@ -12,9 +12,12 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/wdantuma/signalk-server-go/canboat"
+	"github.com/wdantuma/signalk-server-go/converter/nmea0183"
+	"github.com/wdantuma/signalk-server-go/converter/nmea2000"
 	"github.com/wdantuma/signalk-server-go/signalkserver"
 	"github.com/wdantuma/signalk-server-go/source"
-	"github.com/wdantuma/signalk-server-go/source/nmea2000"
+	"github.com/wdantuma/signalk-server-go/source/nmea0183/udp"
+	"github.com/wdantuma/signalk-server-go/source/nmea2000/can"
 )
 
 type arrayFlag []string
@@ -56,8 +59,10 @@ func main() {
 	mmsi := flag.String("mmsi", "", "Vessel MMSI")
 	var fileSources arrayFlag
 	flag.Var(&fileSources, "file-source", "Path to candump file")
-	var sources arrayFlag
-	flag.Var(&sources, "source", "Source Can device")
+	var canSources arrayFlag
+	flag.Var(&canSources, "can", "Source Can device")
+	var udpSources arrayFlag
+	flag.Var(&udpSources, "udp", "Source Udp device")
 
 	flag.Parse()
 
@@ -101,9 +106,29 @@ func main() {
 		return
 	}
 
+	n2kConverter, err := nmea2000.NewNmea2000ToSignalk(signalkServer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	nmeaConverter, err := nmea0183.NewNmea0183ToSignalk(signalkServer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if len(fileSources) > 0 {
 		for _, fs := range fileSources {
-			canSource, err := source.CreateFileSource(fs)
+			fileSource, err := source.CreateFileSource(fs, n2kConverter, nmeaConverter)
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				signalkServer.AddSource(fileSource)
+			}
+		}
+	}
+
+	if len(canSources) > 0 {
+		for _, s := range canSources {
+			canSource, err := can.NewCanSource(s, n2kConverter)
 			if err != nil {
 				log.Fatal(err)
 			} else {
@@ -112,13 +137,13 @@ func main() {
 		}
 	}
 
-	if len(sources) > 0 {
-		for _, s := range sources {
-			canSource, err := nmea2000.NewCanSource(s)
+	if len(udpSources) > 0 {
+		for _, s := range udpSources {
+			udpSource, err := udp.NewUdpSource(s, nmeaConverter)
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				signalkServer.AddSource(canSource)
+				signalkServer.AddSource(udpSource)
 			}
 		}
 	}
