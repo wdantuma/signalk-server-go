@@ -3,6 +3,7 @@ package pgn
 import (
 	"fmt"
 
+	"github.com/wdantuma/signalk-server-go/converter/base"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 )
 
@@ -33,34 +34,34 @@ func NewPgn130845() *PgnBase {
 	pgn := NewPgnBase(130845)
 
 	pgn.Fields = append(pgn.Fields,
-		field{
-			node: "environment.displaymode",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "environment.displaymode",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Night mode"
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["mode"] = modeMapping[StringValue(fields["value"])]
 				return displayMode
 			},
 		},
-		field{
-			node: "environment.displaymode",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "environment.displaymode",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Backlight level"
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["backlight"] = fields["value"]
 				return displayMode
 			},
 		},
-		field{
-			node: "environment.displaymode",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "environment.displaymode",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("key") && fields.Contains("value") && fields["key"] == "Night mode color"
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				displayMode := getDisplayModeObject(pgn.State)
 				displayMode["color"] = colorMapping[StringValue(fields["value"])]
 				return displayMode

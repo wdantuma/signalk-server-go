@@ -7,42 +7,23 @@ import (
 	"time"
 
 	"github.com/wdantuma/signalk-server-go/canboat"
+	"github.com/wdantuma/signalk-server-go/converter/base"
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 	"github.com/wdantuma/signalk-server-go/source/nmea2000"
-	"go.einride.tech/can"
 )
-
-type n2kFields map[string]interface{}
-
-func (field n2kFields) Contains(key string) bool {
-	_, ok := field[key]
-	return ok
-}
-
-type field struct {
-	filter  func(n2kFields) bool
-	value   func(n2kFields) interface{}
-	context func(n2kFields) *string
-	node    string
-	source  string
-}
 
 type PgnBase struct {
 	Pgn     uint
 	PgnInfo *canboat.PGNInfo
 	Canboat *canboat.Canboat
-	Fields  []field
+	Fields  []base.Field
 	State   state.ServerState
 }
 
-type Pgn interface {
-	Convert(can.Frame, nmea2000.Nmea2000Source) (signalk.DeltaJson, bool)
-}
-
 func NewPgnBase(pgn uint) *PgnBase {
-	return &PgnBase{Pgn: pgn, Fields: make([]field, 0)}
+	return &PgnBase{Pgn: pgn, Fields: make([]base.Field, 0)}
 
 }
 
@@ -69,7 +50,7 @@ func (pgn *PgnBase) Convert(frame nmea2000.ExtendedFrame, source string) (signal
 
 	lookupFieldTypeField := canboat.Field{}
 
-	fields := make(n2kFields)
+	fields := make(base.InputFields)
 	metadata := make(map[string]signalk.Meta)
 
 	for _, f := range pgn.PgnInfo.Fields.Field {
@@ -150,28 +131,28 @@ func (pgn *PgnBase) Convert(frame nmea2000.ExtendedFrame, source string) (signal
 
 		val := signalk.DeltaJsonUpdatesElemValuesElem{}
 		meta := signalk.DeltaJsonUpdatesElemMetaElem{}
-		if field.context != nil {
-			delta.Context = field.context(fields)
+		if field.Context != nil {
+			delta.Context = field.Context(fields)
 		} else {
-			val.Path = field.node
-			meta.Path = field.node
-			if field.source != "" {
-				value, ok := fields[field.source]
+			val.Path = field.Node
+			meta.Path = field.Node
+			if field.Source != "" {
+				value, ok := fields[field.Source]
 				if !ok {
 					continue
 				}
-				m, ok := metadata[field.source]
+				m, ok := metadata[field.Source]
 				if ok {
 					meta.Value = m
 				}
 				val.Value = value
-			} else if field.value != nil {
-				val.Value = field.value(fields)
+			} else if field.Value != nil {
+				val.Value = field.Value(fields)
 			} else {
 				log.Println("No value function")
 				continue
 			}
-			if (field.filter != nil && field.filter(fields)) || field.filter == nil {
+			if (field.Filter != nil && field.Filter(fields)) || field.Filter == nil {
 				include = true
 				delta.Updates[len(delta.Updates)-1].Meta = append(delta.Updates[len(delta.Updates)-1].Meta, meta)
 				delta.Updates[len(delta.Updates)-1].Values = append(delta.Updates[len(delta.Updates)-1].Values, val)
@@ -220,7 +201,7 @@ func MapValue(value interface{}) map[string]interface{} {
 	}
 }
 
-func GetMmsiContext(fields n2kFields) *string {
+func GetMmsiContext(fields base.InputFields) *string {
 	if fields.Contains("userId") {
 		mmsi := fmt.Sprintf("vessels.urn:mrn:imo:mmsi:%s", StringValue(fields["userId"]))
 		return &mmsi

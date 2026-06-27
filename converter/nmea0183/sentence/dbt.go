@@ -1,12 +1,14 @@
 package sentence
 
+import "github.com/wdantuma/signalk-server-go/converter/base"
+
 func NewDBT() *SentenceBase {
 	pgn := NewSentenceBase("DBT")
 
 	pgn.Fields = append(pgn.Fields,
-		field{
-			node:   "environment.depth.belowTransducer",
-			source: "depth",
+		base.Field{
+			Node:   "environment.depth.belowTransducer",
+			Source: "depth",
 		},
 		// field{
 		// 	node:   "environment.depth.surfaceToTransducer",

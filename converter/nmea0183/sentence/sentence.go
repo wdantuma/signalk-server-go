@@ -4,24 +4,20 @@ import (
 	"time"
 
 	"github.com/adrianmo/go-nmea"
+	"github.com/wdantuma/signalk-server-go/converter/base"
 	"github.com/wdantuma/signalk-server-go/ref"
 	"github.com/wdantuma/signalk-server-go/signalk"
 	"github.com/wdantuma/signalk-server-go/signalkserver/state"
 )
 
-type field struct {
-	node   string
-	source string
-}
-
 type SentenceBase struct {
 	Sentence string
-	Fields   []field
+	Fields   []base.Field
 	State    state.ServerState
 }
 
 func NewSentenceBase(sentence string) *SentenceBase {
-	return &SentenceBase{Sentence: sentence, Fields: make([]field, 0)}
+	return &SentenceBase{Sentence: sentence, Fields: make([]base.Field, 0)}
 
 }
 

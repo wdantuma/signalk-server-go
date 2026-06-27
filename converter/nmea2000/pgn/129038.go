@@ -1,5 +1,7 @@
 package pgn
 
+import "github.com/wdantuma/signalk-server-go/converter/base"
+
 var stateMapping = map[string]string{
 	"Under way using engine":             "motoring",
 	"At anchor":                          "anchored",
@@ -26,69 +28,69 @@ func NewPgn129038() *PgnBase {
 	pgn := NewPgnBase(129038)
 
 	pgn.Fields = append(pgn.Fields,
-		field{
-			node:   "navigation.speedOverGround",
-			source: "sog",
+		base.Field{
+			Node:   "navigation.speedOverGround",
+			Source: "sog",
 		},
-		field{
-			node:   "navigation.courseOverGroundTrue",
-			source: "cog",
+		base.Field{
+			Node:   "navigation.courseOverGroundTrue",
+			Source: "cog",
 		},
-		field{
-			node: "navigation.position",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "navigation.position",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("latitude") && fields.Contains("longitude")
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				pos := make(map[string]interface{})
 				pos["longitude"] = fields["longitude"]
 				pos["latitude"] = fields["latitude"]
 				return pos
 			},
 		},
-		field{
-			node:   "navigation.rateOfTurn",
-			source: "rateOfTurn",
+		base.Field{
+			Node:   "navigation.rateOfTurn",
+			Source: "rateOfTurn",
 		},
-		field{
-			node:   "navigation.headingTrue",
-			source: "heading",
+		base.Field{
+			Node:   "navigation.headingTrue",
+			Source: "heading",
 		},
-		field{
-			node: "navigation.state",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "navigation.state",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("navStatus")
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				return stateMapping[StringValue(fields["navStatus"])]
 			},
 		},
-		field{
-			node: "navigation.specialManeuver",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "navigation.specialManeuver",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("specialManeuverIndicator")
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				return specialManeuverMapping[StringValue(fields["specialManeuverIndicator"])]
 			},
 		},
-		field{
-			node: "",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("userId")
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				mmsiReport := make(map[string]interface{})
 				mmsiReport["mmsi"] = fields["userId"]
 				return mmsiReport
 			},
 		},
-		field{
-			context: GetMmsiContext,
+		base.Field{
+			Context: GetMmsiContext,
 		},
-		field{
-			node: "sensors.ais.class",
-			value: func(fields n2kFields) interface{} {
+		base.Field{
+			Node: "sensors.ais.class",
+			Value: func(fields base.InputFields) interface{} {
 				return "A"
 			},
 		},

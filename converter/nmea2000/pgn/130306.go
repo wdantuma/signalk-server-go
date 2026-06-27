@@ -2,39 +2,41 @@ package pgn
 
 import (
 	"math"
+
+	"github.com/wdantuma/signalk-server-go/converter/base"
 )
 
 func NewPgn130306() *PgnBase {
 	pgn := NewPgnBase(130306)
 
 	pgn.Fields = append(pgn.Fields,
-		field{
-			node:   "environment.wind.speedApparent",
-			source: "windSpeed",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.speedApparent",
+			Source: "windSpeed",
+			Filter: func(fields base.InputFields) bool {
 				return !fields.Contains("reference") || fields["reference"] == "Apparent"
 			},
 		},
-		field{
-			node:   "environment.wind.speedTrue",
-			source: "windSpeed",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.speedTrue",
+			Source: "windSpeed",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("reference") && fields["reference"] == "True (boat referenced)"
 			},
 		},
-		field{
-			node:   "environment.wind.speedOverGround",
-			source: "windSpeed",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.speedOverGround",
+			Source: "windSpeed",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("reference") && fields["reference"] == "True (ground referenced to North)"
 			},
 		},
-		field{
-			node: "environment.wind.angleApparent",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node: "environment.wind.angleApparent",
+			Filter: func(fields base.InputFields) bool {
 				return !fields.Contains("reference") || fields["reference"] == "Apparent"
 			},
-			value: func(fields n2kFields) interface{} {
+			Value: func(fields base.InputFields) interface{} {
 				angle := Float64Value(fields["windAngle"])
 				if angle > math.Pi {
 					angle = angle - math.Pi*2
@@ -43,24 +45,24 @@ func NewPgn130306() *PgnBase {
 				return angle
 			},
 		},
-		field{
-			node:   "environment.wind.angleTrueWater",
-			source: "windAngle",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.angleTrueWater",
+			Source: "windAngle",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("reference") && fields["reference"] == "True (boat referenced)"
 			},
 		},
-		field{
-			node:   "environment.wind.directionTrue",
-			source: "windAngle",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.directionTrue",
+			Source: "windAngle",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("reference") && fields["reference"] == "True (ground referenced to North)"
 			},
 		},
-		field{
-			node:   "environment.wind.directionMagnetic",
-			source: "windAngle",
-			filter: func(fields n2kFields) bool {
+		base.Field{
+			Node:   "environment.wind.directionMagnetic",
+			Source: "windAngle",
+			Filter: func(fields base.InputFields) bool {
 				return fields.Contains("reference") && fields["reference"] == "Magnetic (ground referenced to Magnetic North)"
 			},
 		},

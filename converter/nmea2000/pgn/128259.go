@@ -1,20 +1,22 @@
 package pgn
 
+import "github.com/wdantuma/signalk-server-go/converter/base"
+
 func NewPgn128259() *PgnBase {
 	pgn := NewPgnBase(128259)
 
 	pgn.Fields = append(pgn.Fields,
-		field{
-			node:   "navigation.speedThroughWater",
-			source: "speedWaterReferenced",
+		base.Field{
+			Node:   "navigation.speedThroughWater",
+			Source: "speedWaterReferenced",
 		},
-		field{
-			node:   "navigation.speedOverGround",
-			source: "speedGroundReferenced",
+		base.Field{
+			Node:   "navigation.speedOverGround",
+			Source: "speedGroundReferenced",
 		},
-		field{
-			node:   "navigation.speedThroughWaterReferenceType",
-			source: "speedWaterReferencedType",
+		base.Field{
+			Node:   "navigation.speedThroughWaterReferenceType",
+			Source: "speedWaterReferencedType",
 		},
 	)
 
