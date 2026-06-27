@@ -20,6 +20,11 @@ type SentenceBase struct {
 	State    state.ServerState
 }
 
+func NewSentenceBase(sentence string) *SentenceBase {
+	return &SentenceBase{Sentence: sentence, Fields: make([]field, 0)}
+
+}
+
 func (base *SentenceBase) getDelta(sentence nmea.Sentence, source string) signalk.DeltaJson {
 	delta := signalk.DeltaJson{}
 	delta.Context = ref.String(base.State.GetSelf())

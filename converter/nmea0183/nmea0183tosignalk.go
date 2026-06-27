@@ -20,14 +20,16 @@ type Nmea0183ToSignalk interface {
 
 func NewNmea0183ToSignalk(state state.ServerState) (*nmea0183ToSignalk, error) {
 	c := nmea0183ToSignalk{state: state, sentence: make(map[string]*sentence.SentenceBase)}
-
+	c.addSentence(sentence.NewDBT())
 	return &c, nil
 }
 
 func (c *nmea0183ToSignalk) addSentence(b *sentence.SentenceBase) {
+	c.sentence[b.Sentence] = b
 }
 
 func (c *nmea0183ToSignalk) getSentenceConverter(sentence nmea.Sentence) (*sentence.SentenceBase, bool) {
+	log.Println(sentence.DataType())
 	pgnConverter, ok := c.sentence[sentence.DataType()]
 	if ok {
 		return pgnConverter, true

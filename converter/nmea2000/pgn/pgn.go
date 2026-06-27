@@ -136,14 +136,12 @@ func (pgn *PgnBase) Convert(frame nmea2000.ExtendedFrame, source string) (signal
 					fields[field.Id] = value
 				}
 			}
-			break
 		case "MMSI":
 			var value float64
 			value = float64(frame.UnsignedBitsLittleEndian(int(field.BitOffset), int(field.BitLength))) * float64(field.Resolution)
 			if value >= float64(field.RangeMin) && value <= float64(field.RangeMax) {
 				fields[field.Id] = fmt.Sprintf("%.0f", value)
 			}
-			break
 		}
 	}
 
