@@ -55,6 +55,9 @@ type Field struct {
 	Offset                              int     `xml:" Offset,omitempty"`
 	RangeMin                            float32 `xml:" RangeMin,omitempty"`
 	RangeMax                            float32 `xml:" RangeMax,omitempty"`
+	UnknownValue                        uint64  `xml:" UnknownValue,omitempty"`
+	OutOfRangeValue                     uint64  `xml:" OutOfRangeValue,omitempty"`
+	ReservedValue                       uint64  `xml:" ReservedValue,omitempty"`
 	FieldType                           string  `xml:" FieldType"`
 	PhysicalQuantity                    string  `xml:" PhysicalQuantity,omitempty"`
 	LookupEnumeration                   string  `xml:" LookupEnumeration,omitempty"`
@@ -62,6 +65,7 @@ type Field struct {
 	LookupIndirectEnumerationFieldOrder string  `xml:" LookupIndirectEnumerationFieldOrder,omitempty"`
 	LookupBitEnumeration                string  `xml:" LookupBitEnumeration,omitempty"`
 	LookupFieldTypeEnumeration          string  `xml:" LookupFieldTypeEnumeration,omitempty"`
+	PartOfPrimaryKey                    bool    `xml:" PartOfPrimaryKey,omitempty"`
 }
 
 // There are only a few, really basic, field types.
@@ -108,7 +112,7 @@ type LookupBitEnumerations struct {
 type LookupEnumeration struct {
 	EnumPair []EnumPair `xml:" EnumPair,omitempty"`
 	Name     string     `xml:"Name,attr,omitempty"`
-	MaxValue int        `xml:"MaxValue,attr,omitempty"`
+	MaxValue int64      `xml:"MaxValue,attr,omitempty"`
 }
 
 type LookupEnumerations struct {
@@ -185,6 +189,7 @@ type PGNInfo struct {
 	PGN                          int     `xml:" PGN"`
 	Id                           string  `xml:" Id"`
 	Description                  string  `xml:" Description"`
+	Priority                     uint    `xml:" Priority,omitempty"`
 	Explanation                  string  `xml:" Explanation,omitempty"`
 	URL                          string  `xml:" URL,omitempty"`
 	Type                         string  `xml:" Type"`
