@@ -6,14 +6,53 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch signalk-server-go",
+            "name": "Pcap 1",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/signalk-server-go",
-            // "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
-            // "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
-            "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--udp","255.255.255.255:10110" ]
+            "args": ["--port","3000","--mmsi","244000138","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620.pcap" ]
+        },
+        {
+            "name": "Pcap 2",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--port","3000","--mmsi","244000138","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
+        },        
+        {
+            "name": "Pcap 3",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--port","3000","--mmsi","244060807","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/halo_and_0183.pcap" ] 
+        },        
+                    {
+            "name": "Actisense",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/aava-n2k.data" ] 
+        },                    
+        {
+            "name": "Candump",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--port","3000","--mmsi","244810236","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/nemo-n2k-20230719.txt" ]
+        },        
+        {
+            "name": "Udp",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}/cmd/signalk-server-go",
+            "args": ["--port","3000","--mmsi","244060807","--webapp-path","../../static","--charts-path","../../static", "--udp","255.255.255.255:10110" ]
         }
+        
     ]
 }
