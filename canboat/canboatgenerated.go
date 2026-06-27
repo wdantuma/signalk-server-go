@@ -9,10 +9,10 @@ type BitPair struct {
 }
 
 type EnumFieldType struct {
-	LookupEnumeration                   string  `xml:" LookupEnumeration,omitempty"`
-	LookupIndirectEnumeration           string  `xml:" LookupIndirectEnumeration,omitempty"`
-	LookupIndirectEnumerationFieldOrder string  `xml:" LookupIndirectEnumerationFieldOrder,omitempty"`
-	LookupBitEnumeration                string  `xml:" LookupBitEnumeration,omitempty"`
+	LookupEnumeration                   string  `xml:"LookupEnumeration,omitempty"`
+	LookupIndirectEnumeration           string  `xml:"LookupIndirectEnumeration,omitempty"`
+	LookupIndirectEnumerationFieldOrder string  `xml:"LookupIndirectEnumerationFieldOrder,omitempty"`
+	LookupBitEnumeration                string  `xml:"LookupBitEnumeration,omitempty"`
 	Value                               uint    `xml:"Value,attr,omitempty"`
 	Name                                string  `xml:"Name,attr,omitempty"`
 	FieldType                           string  `xml:"FieldType,attr,omitempty"`
@@ -38,57 +38,57 @@ type EnumTriplet struct {
 // The Field is the core definition, as a PGN is usually just a bunch of fields
 // in sequence.
 type Field struct {
-	Order                               byte    `xml:" Order"`
-	Id                                  string  `xml:" Id"`
-	Name                                string  `xml:" Name"`
-	Description                         string  `xml:" Description,omitempty"`
-	BitLengthVariable                   bool    `xml:" BitLengthVariable,omitempty"`
-	BitLengthField                      byte    `xml:" BitLengthField,omitempty"`
-	BitLength                           uint    `xml:" BitLength,omitempty"`
-	BitOffset                           uint    `xml:" BitOffset,omitempty"`
-	BitStart                            byte    `xml:" BitStart,omitempty"`
-	Condition                           string  `xml:" Condition,omitempty"`
-	Match                               int     `xml:" Match,omitempty"`
-	Unit                                string  `xml:" Unit,omitempty"`
-	Resolution                          float32 `xml:" Resolution,omitempty"`
-	Signed                              bool    `xml:" Signed,omitempty"`
-	Offset                              int     `xml:" Offset,omitempty"`
-	RangeMin                            float32 `xml:" RangeMin,omitempty"`
-	RangeMax                            float32 `xml:" RangeMax,omitempty"`
-	UnknownValue                        uint64  `xml:" UnknownValue,omitempty"`
-	OutOfRangeValue                     uint64  `xml:" OutOfRangeValue,omitempty"`
-	ReservedValue                       uint64  `xml:" ReservedValue,omitempty"`
-	FieldType                           string  `xml:" FieldType"`
-	PhysicalQuantity                    string  `xml:" PhysicalQuantity,omitempty"`
-	LookupEnumeration                   string  `xml:" LookupEnumeration,omitempty"`
-	LookupIndirectEnumeration           string  `xml:" LookupIndirectEnumeration,omitempty"`
-	LookupIndirectEnumerationFieldOrder string  `xml:" LookupIndirectEnumerationFieldOrder,omitempty"`
-	LookupBitEnumeration                string  `xml:" LookupBitEnumeration,omitempty"`
-	LookupFieldTypeEnumeration          string  `xml:" LookupFieldTypeEnumeration,omitempty"`
-	PartOfPrimaryKey                    bool    `xml:" PartOfPrimaryKey,omitempty"`
+	Order                               byte    `xml:"Order"`
+	Id                                  string  `xml:"Id"`
+	Name                                string  `xml:"Name"`
+	Description                         string  `xml:"Description,omitempty"`
+	BitLengthVariable                   bool    `xml:"BitLengthVariable,omitempty"`
+	BitLengthField                      byte    `xml:"BitLengthField,omitempty"`
+	BitLength                           uint    `xml:"BitLength,omitempty"`
+	BitOffset                           uint    `xml:"BitOffset,omitempty"`
+	BitStart                            byte    `xml:"BitStart,omitempty"`
+	Condition                           string  `xml:"Condition,omitempty"`
+	Match                               int     `xml:"Match,omitempty"`
+	Unit                                string  `xml:"Unit,omitempty"`
+	Resolution                          float32 `xml:"Resolution,omitempty"`
+	Signed                              bool    `xml:"Signed,omitempty"`
+	Offset                              int     `xml:"Offset,omitempty"`
+	RangeMin                            float32 `xml:"RangeMin,omitempty"`
+	RangeMax                            float32 `xml:"RangeMax,omitempty"`
+	UnknownValue                        uint64  `xml:"UnknownValue,omitempty"`
+	OutOfRangeValue                     uint64  `xml:"OutOfRangeValue,omitempty"`
+	ReservedValue                       uint64  `xml:"ReservedValue,omitempty"`
+	FieldType                           string  `xml:"FieldType"`
+	PhysicalQuantity                    string  `xml:"PhysicalQuantity,omitempty"`
+	LookupEnumeration                   string  `xml:"LookupEnumeration,omitempty"`
+	LookupIndirectEnumeration           string  `xml:"LookupIndirectEnumeration,omitempty"`
+	LookupIndirectEnumerationFieldOrder string  `xml:"LookupIndirectEnumerationFieldOrder,omitempty"`
+	LookupBitEnumeration                string  `xml:"LookupBitEnumeration,omitempty"`
+	LookupFieldTypeEnumeration          string  `xml:"LookupFieldTypeEnumeration,omitempty"`
+	PartOfPrimaryKey                    bool    `xml:"PartOfPrimaryKey,omitempty"`
 }
 
 // There are only a few, really basic, field types.
 // In the C code of the CANBoat analyzer, these map perfectly onto C functions
-// that extract the bits from the PGN and emit them in "human" or "JSON" form.
+// that extract the bits from the PGN and emit them in "human"or "JSON"form.
 type FieldType struct {
-	Description         string `xml:" Description"`
-	EncodingDescription string `xml:" EncodingDescription,omitempty"`
-	Comment             string `xml:" Comment,omitempty"`
-	URL                 string `xml:" URL,omitempty"`
-	Bits                uint   `xml:" Bits,omitempty"`
-	Unit                string `xml:" Unit,omitempty"`
-	Signed              bool   `xml:" Signed,omitempty"`
-	VariableSize        bool   `xml:" VariableSize,omitempty"`
+	Description         string `xml:"Description"`
+	EncodingDescription string `xml:"EncodingDescription,omitempty"`
+	Comment             string `xml:"Comment,omitempty"`
+	URL                 string `xml:"URL,omitempty"`
+	Bits                uint   `xml:"Bits,omitempty"`
+	Unit                string `xml:"Unit,omitempty"`
+	Signed              bool   `xml:"Signed,omitempty"`
+	VariableSize        bool   `xml:"VariableSize,omitempty"`
 	Name                string `xml:"Name,attr,omitempty"`
 }
 
 type FieldTypes struct {
-	FieldType []FieldType `xml:" FieldType,omitempty"`
+	FieldType []FieldType `xml:"FieldType,omitempty"`
 }
 
 type Fields struct {
-	Field []Field `xml:" Field,omitempty"`
+	Field []Field `xml:"Field,omitempty"`
 }
 
 // The LookupBitEnumeration is a list of BitPair elements with a name.
@@ -96,13 +96,13 @@ type Fields struct {
 // field, for instance bit 0 = Too Hot, bit 1 = Too Cold.
 // LookupBitEnumeration fields do not have special null-like values.
 type LookupBitEnumeration struct {
-	BitPair  []BitPair `xml:" BitPair,omitempty"`
+	BitPair  []BitPair `xml:"BitPair,omitempty"`
 	Name     string    `xml:"Name,attr,omitempty"`
 	MaxValue byte      `xml:"MaxValue,attr,omitempty"`
 }
 
 type LookupBitEnumerations struct {
-	LookupBitEnumeration []LookupBitEnumeration `xml:" LookupBitEnumeration,omitempty"`
+	LookupBitEnumeration []LookupBitEnumeration `xml:"LookupBitEnumeration,omitempty"`
 }
 
 // The LookupEnumeration is a list of EnumPair elements with a name.
@@ -110,13 +110,13 @@ type LookupBitEnumerations struct {
 // field, for instance 0 = No, 1 = Yes. The special null-like values
 // for Unknown and Error are not placed in this list.
 type LookupEnumeration struct {
-	EnumPair []EnumPair `xml:" EnumPair,omitempty"`
+	EnumPair []EnumPair `xml:"EnumPair,omitempty"`
 	Name     string     `xml:"Name,attr,omitempty"`
 	MaxValue int64      `xml:"MaxValue,attr,omitempty"`
 }
 
 type LookupEnumerations struct {
-	LookupEnumeration []LookupEnumeration `xml:" LookupEnumeration,omitempty"`
+	LookupEnumeration []LookupEnumeration `xml:"LookupEnumeration,omitempty"`
 }
 
 // The LookupFieldTypeEnumeration is a list of EnumFieldType elements with a name.
@@ -126,13 +126,13 @@ type LookupEnumerations struct {
 // This is different from a LookupEnumeration in that it also defines
 // a set of field attributes for a following variable field.
 type LookupFieldTypeEnumeration struct {
-	EnumFieldType []EnumFieldType `xml:" EnumFieldType,omitempty"`
+	EnumFieldType []EnumFieldType `xml:"EnumFieldType,omitempty"`
 	Name          string          `xml:"Name,attr,omitempty"`
 	MaxValue      int             `xml:"MaxValue,attr,omitempty"`
 }
 
 type LookupFieldTypeEnumerations struct {
-	LookupFieldTypeEnumeration []LookupFieldTypeEnumeration `xml:" LookupFieldTypeEnumeration,omitempty"`
+	LookupFieldTypeEnumeration []LookupFieldTypeEnumeration `xml:"LookupFieldTypeEnumeration,omitempty"`
 }
 
 // The LookupEnumeration is a list of EnumTriplet elements with a name.
@@ -142,18 +142,18 @@ type LookupFieldTypeEnumerations struct {
 // for this field.
 // The special null-like values for Unknown and Error are not placed in this list.
 type LookupIndirectEnumeration struct {
-	EnumTriplet []EnumTriplet `xml:" EnumTriplet,omitempty"`
+	EnumTriplet []EnumTriplet `xml:"EnumTriplet,omitempty"`
 	Name        string        `xml:"Name,attr,omitempty"`
 	MaxValue    int           `xml:"MaxValue,attr,omitempty"`
 }
 
 type LookupIndirectEnumerations struct {
-	LookupIndirectEnumeration []LookupIndirectEnumeration `xml:" LookupIndirectEnumeration,omitempty"`
+	LookupIndirectEnumeration []LookupIndirectEnumeration `xml:"LookupIndirectEnumeration,omitempty"`
 }
 
 // Documents the things that we do not know about this PGN yet.
 type Missing struct {
-	MissingAttribute []string `xml:" MissingAttribute,omitempty"`
+	MissingAttribute []string `xml:"MissingAttribute,omitempty"`
 }
 
 type MissingAttribute struct {
@@ -162,60 +162,60 @@ type MissingAttribute struct {
 }
 
 type MissingEnumerations struct {
-	MissingAttribute []MissingAttribute `xml:" MissingAttribute,omitempty"`
+	MissingAttribute []MissingAttribute `xml:"MissingAttribute,omitempty"`
 }
 
 // The outer container has the historic name PGNDefinitions.
 // Historic, because it now also contains other complex types that
 // are referred to from the PGNs.
 type PGNDefinitions struct {
-	SchemaVersion               string                      `xml:" SchemaVersion"`
-	Comment                     string                      `xml:" Comment"`
-	CreatorCode                 string                      `xml:" CreatorCode"`
-	License                     string                      `xml:" License"`
-	Version                     string                      `xml:" Version"`
-	Copyright                   string                      `xml:" Copyright"`
-	PhysicalQuantities          PhysicalQuantities          `xml:" PhysicalQuantities"`
-	FieldTypes                  FieldTypes                  `xml:" FieldTypes"`
-	MissingEnumerations         MissingEnumerations         `xml:" MissingEnumerations"`
-	LookupEnumerations          LookupEnumerations          `xml:" LookupEnumerations"`
-	LookupIndirectEnumerations  LookupIndirectEnumerations  `xml:" LookupIndirectEnumerations"`
-	LookupBitEnumerations       LookupBitEnumerations       `xml:" LookupBitEnumerations"`
-	LookupFieldTypeEnumerations LookupFieldTypeEnumerations `xml:" LookupFieldTypeEnumerations"`
-	PGNs                        PGNs                        `xml:" PGNs"`
+	SchemaVersion               string                      `xml:"SchemaVersion"`
+	Comment                     string                      `xml:"Comment"`
+	CreatorCode                 string                      `xml:"CreatorCode"`
+	License                     string                      `xml:"License"`
+	Version                     string                      `xml:"Version"`
+	Copyright                   string                      `xml:"Copyright"`
+	PhysicalQuantities          PhysicalQuantities          `xml:"PhysicalQuantities"`
+	FieldTypes                  FieldTypes                  `xml:"FieldTypes"`
+	MissingEnumerations         MissingEnumerations         `xml:"MissingEnumerations"`
+	LookupEnumerations          LookupEnumerations          `xml:"LookupEnumerations"`
+	LookupIndirectEnumerations  LookupIndirectEnumerations  `xml:"LookupIndirectEnumerations"`
+	LookupBitEnumerations       LookupBitEnumerations       `xml:"LookupBitEnumerations"`
+	LookupFieldTypeEnumerations LookupFieldTypeEnumerations `xml:"LookupFieldTypeEnumerations"`
+	PGNs                        PGNs                        `xml:"PGNs"`
 }
 
 type PGNInfo struct {
-	PGN                          int     `xml:" PGN"`
-	Id                           string  `xml:" Id"`
-	Description                  string  `xml:" Description"`
-	Priority                     uint    `xml:" Priority,omitempty"`
-	Explanation                  string  `xml:" Explanation,omitempty"`
-	URL                          string  `xml:" URL,omitempty"`
-	Type                         string  `xml:" Type"`
-	Complete                     bool    `xml:" Complete"`
-	Fallback                     bool    `xml:" Fallback,omitempty"`
-	Missing                      Missing `xml:" Missing,omitempty"`
-	FieldCount                   uint    `xml:" FieldCount"`
-	MinLength                    uint    `xml:" MinLength,omitempty"`
-	Length                       uint    `xml:" Length,omitempty"`
-	RepeatingFieldSet1Size       byte    `xml:" RepeatingFieldSet1Size,omitempty"`
-	RepeatingFieldSet1StartField byte    `xml:" RepeatingFieldSet1StartField,omitempty"`
-	RepeatingFieldSet1CountField byte    `xml:" RepeatingFieldSet1CountField,omitempty"`
-	RepeatingFieldSet2Size       byte    `xml:" RepeatingFieldSet2Size,omitempty"`
-	RepeatingFieldSet2StartField byte    `xml:" RepeatingFieldSet2StartField,omitempty"`
-	RepeatingFieldSet2CountField byte    `xml:" RepeatingFieldSet2CountField,omitempty"`
-	TransmissionInterval         uint    `xml:" TransmissionInterval,omitempty"`
-	TransmissionIrregular        bool    `xml:" TransmissionIrregular,omitempty"`
-	Fields                       Fields  `xml:" Fields,omitempty"`
+	PGN                          int     `xml:"PGN"`
+	Id                           string  `xml:"Id"`
+	Description                  string  `xml:"Description"`
+	Priority                     uint    `xml:"Priority,omitempty"`
+	Explanation                  string  `xml:"Explanation,omitempty"`
+	URL                          string  `xml:"URL,omitempty"`
+	Type                         string  `xml:"Type"`
+	Complete                     bool    `xml:"Complete"`
+	Fallback                     bool    `xml:"Fallback,omitempty"`
+	Missing                      Missing `xml:"Missing,omitempty"`
+	FieldCount                   uint    `xml:"FieldCount"`
+	MinLength                    uint    `xml:"MinLength,omitempty"`
+	Length                       uint    `xml:"Length,omitempty"`
+	RepeatingFieldSet1Size       byte    `xml:"RepeatingFieldSet1Size,omitempty"`
+	RepeatingFieldSet1StartField byte    `xml:"RepeatingFieldSet1StartField,omitempty"`
+	RepeatingFieldSet1CountField byte    `xml:"RepeatingFieldSet1CountField,omitempty"`
+	RepeatingFieldSet2Size       byte    `xml:"RepeatingFieldSet2Size,omitempty"`
+	RepeatingFieldSet2StartField byte    `xml:"RepeatingFieldSet2StartField,omitempty"`
+	RepeatingFieldSet2CountField byte    `xml:"RepeatingFieldSet2CountField,omitempty"`
+	TransmissionInterval         uint    `xml:"TransmissionInterval,omitempty"`
+	TransmissionIrregular        bool    `xml:"TransmissionIrregular,omitempty"`
+	Fields                       Fields  `xml:"Fields,omitempty"`
 }
 
 type PGNs struct {
-	PGNInfo []PGNInfo `xml:" PGNInfo,omitempty"`
+	PGNInfo []PGNInfo `xml:"PGNInfo,omitempty"`
 }
 
 type PhysicalQuantities struct {
-	PhysicalQuantity []PhysicalQuantity `xml:" PhysicalQuantity,omitempty"`
+	PhysicalQuantity []PhysicalQuantity `xml:"PhysicalQuantity,omitempty"`
 }
 
 // To explain numeric types more easily the concept of a PhysicalQuantity
@@ -228,10 +228,10 @@ type PhysicalQuantities struct {
 // The PhysicalQuantity is mostly used for 'explanation', it is not fundamental
 // to interpreting the PGN field values.
 type PhysicalQuantity struct {
-	Description     string `xml:" Description"`
-	Comment         string `xml:" Comment,omitempty"`
-	URL             string `xml:" URL,omitempty"`
-	UnitDescription string `xml:" UnitDescription"`
-	Unit            string `xml:" Unit"`
+	Description     string `xml:"Description"`
+	Comment         string `xml:"Comment,omitempty"`
+	URL             string `xml:"URL,omitempty"`
+	UnitDescription string `xml:"UnitDescription"`
+	Unit            string `xml:"Unit"`
 	Name            string `xml:"Name,attr,omitempty"`
 }
