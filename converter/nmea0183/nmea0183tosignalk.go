@@ -21,15 +21,16 @@ type Nmea0183ToSignalk interface {
 func NewNmea0183ToSignalk(state state.ServerState) (*nmea0183ToSignalk, error) {
 	c := nmea0183ToSignalk{state: state, sentence: make(map[string]*sentence.SentenceBase)}
 	c.addSentence(sentence.NewDBT())
+	c.addSentence(sentence.NewMWV())
 	return &c, nil
 }
 
 func (c *nmea0183ToSignalk) addSentence(b *sentence.SentenceBase) {
+	b.Init(c.state)
 	c.sentence[b.Sentence] = b
 }
 
 func (c *nmea0183ToSignalk) getSentenceConverter(sentence nmea.Sentence) (*sentence.SentenceBase, bool) {
-	log.Println(sentence.DataType())
 	pgnConverter, ok := c.sentence[sentence.DataType()]
 	if ok {
 		return pgnConverter, true
@@ -43,6 +44,9 @@ func (c *nmea0183ToSignalk) Convert(label string, sentenceSource <-chan nmea.Sen
 		for {
 			sentence, ok := <-sentenceSource
 			if ok {
+				if sentence.DataType() == "MWV" {
+					log.Printf("Break")
+				}
 				sentenceConverter, ok := c.getSentenceConverter(sentence)
 				if ok {
 					delta, convertOk := sentenceConverter.Convert(sentence, label)
@@ -51,7 +55,7 @@ func (c *nmea0183ToSignalk) Convert(label string, sentenceSource <-chan nmea.Sen
 					}
 				} else {
 					if c.state.GetDebug() {
-						log.Printf("Sentence:%s\n", sentence.DataType())
+						log.Printf("Sentence:%s:%s\n", sentence.TalkerID(), sentence.DataType())
 					}
 				}
 			} else {

@@ -19,7 +19,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/signalk-server-go",
-            "args": ["--port","3000","--mmsi","244000138","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
+            "args": ["--port","3000","--mmsi","244000138","--debug","--webapp-path","../../static","--charts-path","../../static", "--file-source","../../samples/bommel20260620-2.pcap" ]
         },        
         {
             "name": "Pcap 3",
@@ -51,7 +51,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}/cmd/signalk-server-go",
-            "args": ["--port","3000","--mmsi","244060807","--webapp-path","../../static","--charts-path","../../static", "--udp","255.255.255.255:10110" ]
+            "args": ["--port","3000","--mmsi","244060807","--debug","--webapp-path","../../static","--charts-path","../../static", "--udp","192.168.1.255:10110" ]
         }
         
     ]
