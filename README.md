@@ -2,7 +2,7 @@
 
 Start of a [signal K](https://signalk.org/specification/1.7.0/doc/) server implemented in go 
 
-First only a n2k can source will be implemented with a subset of [canboat](https://signalk.org/specification/1.7.0/doc/) supported PGN's 
+First only a n2k can source will be implemented with a subset of [canboat](https://github.com/canboat/canboat) supported PGN's 
 
 
 ## Dependencies
