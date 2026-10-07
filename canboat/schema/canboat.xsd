@@ -1,11 +1,11 @@
-<xs:schema version="2.4.0"
+<xs:schema version="2.7.0"
            attributeFormDefault="unqualified"
            elementFormDefault="qualified"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="PGNDefinitions" type="PGNDefinitions">
     <xs:annotation>
       <xs:documentation>
-CANboat version v6.2.2 2009-2025, Kees Verruijt, Harlingen, The Netherlands.
+CANboat version v8.3.0 2009-2026, Kees Verruijt, Harlingen, The Netherlands.
 For more information see https://github.com/canboat/canboat
 
 This file is part of CANboat.
@@ -48,7 +48,7 @@ limitations under the License.
     <xs:sequence>
       <xs:annotation>
         <xs:documentation>
-          Whereever possible we use a straight sequence, which garantuees
+          Wherever possible we use a straight sequence, which guarantees
           that the children elements are always in the same order.
 
           This has as children some basic string elements followed by
@@ -72,6 +72,20 @@ limitations under the License.
       <xs:element type="xs:string" name="License"/>
       <xs:element type="xs:string" name="Version"/>
       <xs:element type="xs:string" name="Copyright"/>
+      <xs:element type="Protocol" name="Protocol" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The protocol on the CAN bus these PGNs are carried on. NMEA 2000
+            (docs/canboat.xml) and SAE J1939 (docs/canboat-j1939.xml) share
+            the ISO 11783 frame header, address claim and transport protocol
+            but define different PGNs, and only NMEA 2000 has fast-packet
+            framing. Quick PCS (docs/canboat-quick.xml) has 11-bit CAN
+            identifiers instead: there the PGN is the identifier, a message
+            type, with no priority, source or destination. Absent in documents
+            older than schema 2.7.0, which are all NMEA 2000.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="PhysicalQuantities" name="PhysicalQuantities"/>
       <xs:element type="FieldTypes" name="FieldTypes"/>
       <xs:element type="MissingEnumerations" name="MissingEnumerations"/>
@@ -82,6 +96,14 @@ limitations under the License.
       <xs:element type="PGNs" name="PGNs"/>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:simpleType name="Protocol">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="nmea2000"/>
+      <xs:enumeration value="j1939"/>
+      <xs:enumeration value="quick"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="EnumPair">
     <xs:simpleContent>
@@ -139,7 +161,7 @@ limitations under the License.
       <xs:element type="EnumTriplet" name="EnumTriplet" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="Name"/>
-    <xs:attribute type="xs:int" name="MaxValue"/>
+    <xs:attribute type="xs:long" name="MaxValue"/>
   </xs:complexType>
 
   <xs:complexType name="LookupIndirectEnumerations">
@@ -197,7 +219,7 @@ limitations under the License.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="xs:string" name="LookupIndirectEnumerationFieldOrder" minOccurs="0">
+      <xs:element type="xs:byte" name="LookupIndirectEnumerationFieldOrder" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             When the FieldType is INDIRECT_LOOKUP, the field value has meaning that
@@ -252,7 +274,7 @@ limitations under the License.
       <xs:documentation>
         To explain numeric types more easily the concept of a PhysicalQuantity
         is introduced. Given the few public snippets of the NMEA PGN definitions
-        it looks as if they do not explicity have such a concept, but it seems
+        it looks as if they do not explicitly have such a concept, but it seems
         a nice way of grouping similar fields.
         If a field represents a value with a particular unit, like 'A' for Ampere,
         this refers to the concept of ELECTRICAL_CURRENT -- at least that is how
@@ -323,7 +345,7 @@ limitations under the License.
       <xs:element type="xs:boolean" name="Signed" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
-            Present in the FieldType when all fields have a garuanteed sign.
+            Present in the FieldType when all fields have a guaranteed sign.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -333,6 +355,37 @@ limitations under the License.
             True if the fields of this FieldType all have a variable length in bits.
           </xs:documentation>
         </xs:annotation>
+      </xs:element>
+      <xs:element name="Sentinels">
+        <xs:annotation>
+          <xs:documentation>
+            How a field of this type signals "data not available" (and, for integers,
+            out-of-range and reserved). One of:
+            TopOfRange  - the top 1 to 3 raw integer values are reserved as
+                          Unknown (most positive), OutOfRange (max-1) and Reserved
+                          (max-2); the count depends on the bit width, so the actual
+                          reserved values are given per field as UnknownValue,
+                          OutOfRangeValue and ReservedValue. For LOOKUP fields a value
+                          that the enumeration names explicitly is a real value and is
+                          not reserved, lowering the count.
+            EmptyString - an empty string (after trimming end-of-string bytes such as
+                          0xff, 0x00 and '@') marks the field as unavailable.
+            NaN         - the IEEE-754 Not-a-Number value.
+            Variable    - the convention depends on the data type that is resolved at
+                          run time through the companion DYNAMIC_FIELD_KEY field.
+            None        - the field has no unavailable encoding (an identifier such as
+                          PGN or MMSI, filler such as RESERVED, or a structured field).
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="TopOfRange"/>
+            <xs:enumeration value="EmptyString"/>
+            <xs:enumeration value="NaN"/>
+            <xs:enumeration value="Variable"/>
+            <xs:enumeration value="None"/>
+          </xs:restriction>
+        </xs:simpleType>
       </xs:element>
     </xs:sequence>
     <xs:attribute type="xs:string" name="Name"/>
@@ -379,6 +432,30 @@ limitations under the License.
         <xs:annotation>
           <xs:documentation>
             An extra explanation.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:unsignedInt" name="SPN" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            SAE J1939 only: the Suspect Parameter Number J1939-71 gives this
+            value. It identifies the value itself, whichever PGN carries it,
+            and is what J1939 documentation and diagnostic trouble codes
+            (DM1) refer to. Absent on NMEA 2000 fields.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:string" name="Continues" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The Id of an earlier field in the same record (and the same
+            repeating set) whose value this field continues: this field's
+            bits are that value's high bits, above the earlier field's own
+            BitLength. The field keeps its own place in the layout. J1939-73
+            splits a trouble code's 19-bit SPN this way, around the FMI.
+            A decoder that does not know this element sees two plain
+            numbers; one that does shows the earlier field with the joined
+            value (and its lookup name), and this field not at all.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -485,13 +562,24 @@ limitations under the License.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="xs:int" name="Offset" minOccurs="0">
+      <xs:element type="xs:decimal" name="Offset" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             When the value is signed, but not in 2s complement, the value is in
             Excess K format and this element contains the (negative) offset that
             must be added to the unsigned binary number to end up with the 
-            appropriate signed value.
+            appropriate signed value. It is in the field's own units, so it can
+            have a fraction (J1939's -62.5 L fluid level deviation).
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:unsignedByte" name="DynamicFieldLengthOverhead" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            For a DYNAMIC_FIELD_LENGTH field: the number of non-value header bytes (for example a class byte
+            and a data-type id) that sit between this length field and the value and are counted in this
+            length. A decoder must subtract this from the length to obtain the byte count of the following
+            DYNAMIC_FIELD_VALUE field.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -545,6 +633,32 @@ limitations under the License.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element type="xs:string" name="Encoding" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Character set to read this field's bytes as when they are not
+            well-formed UTF-8. Only present on 8-bit string fields whose
+            device is known to put some other charset on the wire; absent
+            means Latin-1, which is what every string field uses by default.
+
+            A reader should still try UTF-8 first and consult this only when
+            that fails. RDS2 carries text as UTF-8, so a device that gains it
+            will start sending valid UTF-8 in the same field and must keep
+            decoding without a database change.
+
+            RDS_G0 is the Basic RDS character set: IEC 62106 table E.1,
+            published identically as the "Complete EBU Latin based
+            repertoire" in ETSI TS 101 756 V1.6.1 (2014-05) annex C.
+
+            Take it from V1.6.1, not from the V1.8.1 (2015-12) revision of
+            that annex, and not from a third-party copy. V1.8.1 reassigns 36
+            of the 224 positions - the whole 0xA0..0xBF block, 0x24, and
+            backslash, brace and bar - as a DAB-only extension that never
+            reached RDS. The two agree on every accented letter common in a
+            station name, so the mistake does not show up in casual testing.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="xs:string" name="PhysicalQuantity" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -570,7 +684,7 @@ limitations under the License.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="xs:string" name="LookupIndirectEnumerationFieldOrder" minOccurs="0">
+      <xs:element type="xs:byte" name="LookupIndirectEnumerationFieldOrder" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             When the FieldType is INDIRECT_LOOKUP, the field value has meaning that
@@ -649,6 +763,7 @@ limitations under the License.
       <xs:element type="xs:unsignedShort" name="Priority" minOccurs="0"/>
       <xs:element type="xs:string" name="Explanation" minOccurs="0"/>
       <xs:element type="xs:string" name="URL" minOccurs="0"/>
+      <xs:element type="xs:string" name="ResearchDoc" minOccurs="0"/>
       <xs:element type="xs:string" name="Type">
         <xs:annotation>
           <xs:documentation>
@@ -683,8 +798,29 @@ limitations under the License.
         </xs:annotation>
       </xs:element>
       <xs:element type="xs:unsignedShort" name="FieldCount"/>
-      <xs:element type="xs:unsignedShort" name="MinLength" minOccurs="0"/>
-      <xs:element type="xs:unsignedShort" name="Length" minOccurs="0"/>
+      <xs:element type="xs:unsignedShort" name="MinLength" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The length in bytes of the shortest payload that still decodes as this PGN.
+            On a variable-length PGN (one with a repeating field set, or a field whose
+            width is not known in advance) this is the only length published: the actual
+            length depends on how often the set repeats.
+            On a fixed-length PGN it appears next to Length, and then documents that
+            shorter payloads occur on the wire: the trailing fields were added by a later
+            NMEA 2000 version and devices built against the earlier layout still omit
+            them. Such a payload ends on a field boundary, so every field it does contain
+            decodes normally and the fields past MinLength are simply absent.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:unsignedShort" name="Length" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The length in bytes of a complete payload, present only when the PGN has a
+            fixed length. See MinLength for the shortest form that is still accepted.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="xs:byte" name="RepeatingFieldSet1Size" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
